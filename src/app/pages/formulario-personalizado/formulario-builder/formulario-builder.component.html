@@ -1,0 +1,242 @@
+<div class="formulario-builder-container">
+  
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">
+      <span *ngIf="loadingFormulario">Cargando formulario...</span>
+      <span *ngIf="loadingEspecialidades">Cargando especialidades...</span>
+      <span *ngIf="loadingPreguntas">Cargando preguntas...</span>
+    </p>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="formBuilderForm" (ngSubmit)="guardarFormulario()" *ngIf="!isLoading">
+    
+    <!-- Header -->
+    <mat-card class="header-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>assignment</mat-icon>
+          {{ isEditMode ? 'Editar' : 'Crear' }} Formulario Personalizado
+        </mat-card-title>
+      </mat-card-header>
+    </mat-card>
+
+    <!-- Información Básica del Formulario -->
+    <mat-card class="form-section-card">
+      <mat-card-header>
+        <mat-card-subtitle>Información Básica</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="form-row">
+          <!-- Nombre del Formulario -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre del Formulario</mat-label>
+            <input 
+              matInput 
+              formControlName="nombre" 
+              placeholder="Ej: Evaluación inicial de pacientes"
+              maxlength="100">
+            <mat-hint align="end">{{ formBuilderForm.get('nombre')?.value?.length || 0 }}/100</mat-hint>
+            <mat-error>{{ getErrorMessage('nombre') }}</mat-error>
+            <mat-icon matSuffix>title</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <!-- Especialidad -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Especialidad</mat-label>
+            <mat-select formControlName="especialidad" [disabled]="loadingEspecialidades">
+              <mat-option *ngFor="let especialidad of especialidades.data" [value]="especialidad.id">
+                {{ especialidad.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error>{{ getErrorMessage('especialidad') }}</mat-error>
+            <mat-icon matSuffix>category</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sección de Preguntas -->
+    <mat-card class="form-section-card">
+      <mat-card-header>
+        <mat-card-subtitle>
+          <div class="preguntas-header">
+            <span>Preguntas del Formulario</span>
+            <button 
+              mat-fab 
+              color="primary" 
+              type="button"
+              (click)="agregarPregunta()"
+              matTooltip="Agregar nueva pregunta"
+              class="add-question-fab">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Lista de Preguntas -->
+        <div formArrayName="preguntas" class="preguntas-container">
+          
+          <!-- Mensaje cuando no hay preguntas -->
+          <div *ngIf="preguntas.length === 0" class="no-preguntas">
+            <mat-icon class="large-icon">help_outline</mat-icon>
+            <h3>No hay preguntas agregadas</h3>
+            <p>Haga clic en el botón "+" para agregar su primera pregunta</p>
+          </div>
+
+          <!-- Preguntas existentes -->
+          <div *ngFor="let pregunta of preguntas; let i = index" 
+               [formGroupName]="i" 
+               class="pregunta-item"
+               [@slideIn]>
+            
+            <mat-card class="pregunta-card">
+              <mat-card-header>
+                <div class="pregunta-header">
+                  <mat-card-title class="pregunta-numero">
+                    Pregunta {{ i + 1 }}
+                  </mat-card-title>
+                  <div class="pregunta-actions">
+                    <!-- Botones de movimiento -->
+                    <button 
+                      mat-icon-button 
+                      type="button"
+                      [disabled]="i === 0"
+                      (click)="moverPregunta(i, i - 1)"
+                      matTooltip="Mover hacia arriba">
+                      <mat-icon>keyboard_arrow_up</mat-icon>
+                    </button>
+                    <button 
+                      mat-icon-button 
+                      type="button"
+                      [disabled]="i === preguntas.length - 1"
+                      (click)="moverPregunta(i, i + 1)"
+                      matTooltip="Mover hacia abajo">
+                      <mat-icon>keyboard_arrow_down</mat-icon>
+                    </button>
+                    <!-- Botón eliminar -->
+                    <button 
+                      mat-icon-button 
+                      color="warn" 
+                      type="button"
+                      (click)="eliminarPregunta(i)"
+                      matTooltip="Eliminar pregunta">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="pregunta-form">
+                  
+                  <!-- Texto de la pregunta -->
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Texto de la pregunta</mat-label>
+                      <textarea 
+                        matInput 
+                        formControlName="texto"
+                        rows="2"
+                        placeholder="Escriba aquí su pregunta..."
+                        maxlength="500"></textarea>
+                      <mat-hint align="end">{{ pregunta.get('texto')?.value?.length || 0 }}/500</mat-hint>
+                      <mat-error>{{ getErrorMessage('texto', i) }}</mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row-split">
+                    <!-- Tipo de dato -->
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Tipo de respuesta</mat-label>
+                      <mat-select formControlName="tipo_dato">
+                        <mat-option *ngFor="let tipo of tiposDato" [value]="tipo.value">
+                          <mat-icon class="option-icon"></mat-icon>
+                          {{ tipo.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error>{{ getErrorMessage('tipo_dato', i) }}</mat-error>
+                    </mat-form-field>
+
+                    <!-- Checkbox obligatorio -->
+                    <div class="checkbox-container half-width">
+                      <mat-checkbox formControlName="obligatorio" color="primary">
+                        <span class="checkbox-label">
+                          <mat-icon class="checkbox-icon">star</mat-icon>
+                          Campo obligatorio
+                        </span>
+                      </mat-checkbox>
+                    </div>
+                  </div>
+
+                  <!-- Campo respuesta (solo para edición/vista previa) -->
+                  <div class="form-row" *ngIf="isEditMode">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Respuesta por defecto (opcional)</mat-label>
+                      <input 
+                        matInput 
+                        formControlName="respuesta"
+                        placeholder="Valor por defecto para esta pregunta...">
+                      <mat-icon matSuffix>edit</mat-icon>
+                    </mat-form-field>
+                  </div>
+
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+
+        <!-- Botón agregar pregunta (alternativo) -->
+        <div class="add-question-section" *ngIf="preguntas.length > 0">
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            type="button"
+            (click)="agregarPregunta()"
+            class="add-question-button">
+            <mat-icon>add</mat-icon>
+            Agregar otra pregunta
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Botones de acción -->
+    <mat-card class="actions-card">
+      <mat-card-content>
+        <div class="actions-container">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit" 
+            [disabled]="formBuilderForm.invalid || submitting"
+            class="action-button primary-action">
+            <mat-icon *ngIf="!submitting">save</mat-icon>
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            {{ submitting ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }} Formulario
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            color="warn" 
+            type="button"
+            (click)="cancelar()"
+            [disabled]="submitting"
+            class="action-button secondary-action">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </form>
+</div>

@@ -1,0 +1,28 @@
+.form-card {
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.question-card {
+  margin-bottom: 15px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.respuesta {
+  margin-top: 10px;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.loading {
+  font-size: 16px;
+  color: gray;
+  text-align: center;
+  margin-top: 20px;
+}

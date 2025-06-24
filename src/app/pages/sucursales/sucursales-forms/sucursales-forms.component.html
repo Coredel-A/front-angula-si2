@@ -1,0 +1,220 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">
+      <mat-icon class="m-r-8">{{ isEditMode ? 'edit' : 'add_business' }}</mat-icon>
+      {{ isEditMode ? 'Editar' : 'Nueva' }} Sucursal
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content class="b-t-1">
+    <!-- Spinner de carga para modo edición -->
+    <div class="text-center p-4" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="m-t-16">Cargando datos de la sucursal...</p>
+    </div>
+
+    <form [formGroup]="sucursalForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+      <div class="row">
+        <!-- Nombre -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Nombre de la Sucursal *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ej: Clínica San José" 
+              formControlName="nombre"
+              maxlength="100">
+            <mat-icon matSuffix>business</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('nombre')">
+              {{ getErrorMessage('nombre') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Tipo de Establecimiento -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Tipo de Establecimiento *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="tipo_establecimiento">
+              <mat-option value="">Seleccionar tipo</mat-option>
+              @for(tipo of tiposEstablecimiento; track tipo.value) {
+                <mat-option [value]="tipo.value">
+                  {{ tipo.viewValue }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>category</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('tipo_establecimiento')">
+              {{ getErrorMessage('tipo_establecimiento') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Dirección -->
+        <div class="col-lg-8">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Dirección *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ej: Calle Salud 123, Zona Central" 
+              formControlName="direccion"
+              maxlength="200">
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('direccion')">
+              {{ getErrorMessage('direccion') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Nivel -->
+        <div class="col-lg-4">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Nivel de Atención *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="nivel">
+              <mat-option value="">Seleccionar nivel</mat-option>
+              @for(nivel of niveles; track nivel.value) {
+                <mat-option [value]="nivel.value">
+                  {{ nivel.viewValue }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>layers</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('nivel')">
+              {{ getErrorMessage('nivel') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Teléfono *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ej: 555-123456" 
+              formControlName="telefono"
+              maxlength="15">
+            <mat-icon matSuffix>phone</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('telefono')">
+              {{ getErrorMessage('telefono') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Correo -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Correo Electrónico *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              type="email" 
+              placeholder="Ej: contacto@clinica.com" 
+              formControlName="correo"
+              maxlength="100">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('correo')">
+              {{ getErrorMessage('correo') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Especialidades -->
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Especialidades Médicas
+          </mat-label>
+          
+          <!-- Selector de especialidades -->
+          <mat-form-field appearance="outline" class="w-100 m-b-16">
+            <mat-select placeholder="Seleccionar especialidad para agregar">
+              @for(especialidad of getEspecialidadesNoSeleccionadas(); track especialidad.id) {
+                <mat-option 
+                  [value]="especialidad.id" 
+                  (click)="onEspecialidadSeleccionada(especialidad.id)">
+                  {{ especialidad.nombre }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>medical_services</mat-icon>
+          </mat-form-field>
+
+          <!-- Chips de especialidades seleccionadas -->
+          <div class="especialidades-chips" *ngIf="especialidadesSeleccionadas.length > 0">
+            <mat-label class="f-w-500 m-b-8 d-block text-muted">
+              Especialidades seleccionadas:
+            </mat-label>
+            <mat-chip-set>
+              @for(especialidad of especialidadesSeleccionadas; track especialidad.id) {
+                <mat-chip 
+                  [removable]="true" 
+                  (removed)="removerEspecialidad(especialidad.id)">
+                  <mat-icon matChipAvatar>medical_services</mat-icon>
+                  {{ especialidad.nombre }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+
+          <!-- Mensaje cuando no hay especialidades -->
+          <div class="no-especialidades" *ngIf="especialidadesSeleccionadas.length === 0">
+            <p class="text-muted m-0">
+              <mat-icon class="align-middle m-r-8">info</mat-icon>
+              No se han seleccionado especialidades. Puedes agregar especialidades usando el selector de arriba.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="info-section m-t-24 p-16 bg-light-primary rounded">
+        <h4 class="m-b-8">
+          <mat-icon class="align-middle m-r-8">info</mat-icon>
+          Información importante
+        </h4>
+        <ul class="info-list">
+          <li>Los campos marcados con (*) son obligatorios</li>
+          <li>El teléfono debe tener entre 7 y 15 caracteres</li>
+          <li>Las especialidades son opcionales y se pueden agregar o quitar en cualquier momento</li>
+          <li>La dirección debe ser lo más específica posible</li>
+        </ul>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions m-t-24">
+        <button 
+          mat-flat-button 
+          color="primary" 
+          type="submit"
+          [disabled]="submitting || sucursalForm.invalid"
+          class="m-r-8">
+          <mat-spinner diameter="20" *ngIf="submitting" class="m-r-8"></mat-spinner>
+          <mat-icon *ngIf="!submitting">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+          {{ submitting ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }} Sucursal
+        </button>
+        
+        <button 
+          mat-stroked-button 
+          color="warn" 
+          type="button"
+          (click)="onCancel()"
+          [disabled]="submitting">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

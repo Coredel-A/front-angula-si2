@@ -1,0 +1,301 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">
+      <mat-icon class="m-r-8">{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+      {{ isEditMode ? 'Editar' : 'Nuevo' }} Paciente
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content class="b-t-1">
+    <!-- Spinner de carga para modo edición -->
+    <div class="text-center p-4" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="m-t-16">Cargando datos del paciente...</p>
+    </div>
+
+    <form [formGroup]="pacienteForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+      <div class="row">
+        <!-- Nombre -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Nombre *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ingrese el nombre" 
+              formControlName="nombre"
+              maxlength="100">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('nombre')">
+              {{ getErrorMessage('nombre') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Apellido -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Apellido *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ingrese el apellido" 
+              formControlName="apellido"
+              maxlength="200">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('apellido')">
+              {{ getErrorMessage('apellido') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- CI -->
+        <div class="col-lg-4">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Cédula de Identidad *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ej: 12345678" 
+              formControlName="ci">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('ci')">
+              {{ getErrorMessage('ci') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Sexo -->
+        <div class="col-lg-4">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Sexo *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="sexo">
+              <mat-option value="">Seleccionar sexo</mat-option>
+              @for(opcion of opcionesSexo; track opcion.value) {
+                <mat-option [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>wc</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('sexo')">
+              {{ getErrorMessage('sexo') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Fecha de Nacimiento -->
+        <div class="col-lg-4">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Fecha de Nacimiento *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              type="date"
+              formControlName="fecha_nacimiento">
+            <mat-icon matSuffix>cake</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('fecha_nacimiento')">
+              {{ getErrorMessage('fecha_nacimiento') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Teléfono
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ej: 555-123456" 
+              formControlName="telefono"
+              maxlength="15">
+            <mat-icon matSuffix>phone</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('telefono')">
+              {{ getErrorMessage('telefono') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Email -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Correo Electrónico *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              type="email" 
+              placeholder="Ej: paciente@email.com" 
+              formControlName="email"
+              maxlength="100">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('email')">
+              {{ getErrorMessage('email') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Residencia -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Residencia
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Ciudad o municipio de residencia" 
+              formControlName="residencia"
+              maxlength="200">
+            <mat-icon matSuffix>location_city</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('residencia')">
+              {{ getErrorMessage('residencia') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Dirección -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Dirección
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Dirección completa" 
+              formControlName="direccion"
+              maxlength="200">
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('direccion')">
+              {{ getErrorMessage('direccion') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Religión -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Religión
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Religión que profesa" 
+              formControlName="religion"
+              maxlength="100">
+            <mat-icon matSuffix>church</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('religion')">
+              {{ getErrorMessage('religion') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Ocupación -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Ocupación
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input 
+              matInput 
+              placeholder="Profesión u ocupación" 
+              formControlName="ocupacion"
+              maxlength="200">
+            <mat-icon matSuffix>work</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('ocupacion')">
+              {{ getErrorMessage('ocupacion') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Estado de Asegurado -->
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Estado de Seguro *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="asegurado">
+              <mat-option value="">Seleccionar estado</mat-option>
+              @for(opcion of opcionesAsegurado; track opcion.value) {
+                <mat-option [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>security</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('asegurado')">
+              {{ getErrorMessage('asegurado') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Beneficiario de (solo si no está asegurado) -->
+        <div class="col-lg-6" *ngIf="pacienteForm.get('asegurado')?.value === false">
+          <mat-label class="f-w-600 m-b-8 d-block">
+            Beneficiario de *
+          </mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="beneficiario_de">
+              <mat-option value="">Seleccionar asegurado</mat-option>
+              @for(paciente of pacientesAsegurados; track paciente.id) {
+                <mat-option [value]="paciente.id">
+                  {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.ci }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>family_restroom</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('beneficiario_de')">
+              {{ getErrorMessage('beneficiario_de') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="info-section m-t-24 p-16 bg-light-primary rounded">
+        <h4 class="m-b-8">
+          <mat-icon class="align-middle m-r-8">info</mat-icon>
+          Información importante
+        </h4>
+        <ul class="info-list">
+          <li>Los campos marcados con (*) son obligatorios</li>
+          <li>El teléfono debe tener entre 7 y 15 caracteres y puede incluir números, guiones, espacios y paréntesis</li>
+          <li>El correo electrónico debe tener un formato válido</li>
+          <li>Si el paciente no está asegurado, debe seleccionar de quién es beneficiario</li>
+          <li>La fecha de nacimiento debe ser anterior a la fecha actual</li>
+        </ul>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions m-t-24">
+        <button 
+          mat-flat-button 
+          color="primary" 
+          type="submit"
+          [disabled]="submitting || pacienteForm.invalid"
+          class="m-r-8">
+          <mat-spinner diameter="20" *ngIf="submitting" class="m-r-8"></mat-spinner>
+          <mat-icon *ngIf="!submitting">{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
+          {{ submitting ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }} Paciente
+        </button>
+        
+        <button 
+          mat-stroked-button 
+          color="warn" 
+          type="button"
+          (click)="onCancel()"
+          [disabled]="submitting">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

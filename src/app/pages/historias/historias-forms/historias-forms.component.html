@@ -1,0 +1,177 @@
+<mat-card class="cardWithShadow">
+  <mat-card-title>Registrar Historia Clínica</mat-card-title>
+
+  <!-- Información del paciente y usuario -->
+  <div class="m-b-16">
+    <p><strong>Paciente:</strong> {{ nombrePaciente }}</p>
+    <p><strong>Usuario:</strong> {{ nombreUsuario }}</p>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div class="d-flex justify-content-center m-t-16" *ngIf="loading && !submitting">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span class="m-l-8">Cargando datos...</span>
+  </div>
+
+  <form [formGroup]="historiaform" (ngSubmit)="onSubmit()" *ngIf="!loading">
+
+    <!-- Especialidad -->
+    <mat-form-field appearance="outline" class="w-100 m-t-16">
+      <mat-label>Especialidad</mat-label>
+      <mat-select formControlName="especialidad" required>
+        <mat-option *ngFor="let esp of especialidades.data" [value]="esp.id">
+          {{ esp.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="hasError('especialidad')">
+        {{ getErrorMessage('especialidad') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Motivo de Consulta -->
+    <mat-form-field appearance="outline" class="w-100 m-t-16">
+      <mat-label>Motivo de Consulta</mat-label>
+      <textarea matInput 
+                formControlName="motivo_consulta" 
+                rows="3" 
+                required 
+                placeholder="Describe el motivo de la consulta">
+      </textarea>
+      <mat-error *ngIf="hasError('motivo_consulta')">
+        {{ getErrorMessage('motivo_consulta') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Fuente -->
+    <mat-form-field appearance="outline" class="w-100 m-t-16">
+      <mat-label>Fuente</mat-label>
+      <mat-select formControlName="fuente" required>
+        <mat-option value="Paciente">Paciente</mat-option>
+        <mat-option value="Familiar">Familiar</mat-option>
+        <mat-option value="Cuidador">Cuidador</mat-option>
+        <mat-option value="Otro">Otro</mat-option>
+      </mat-select>
+      <mat-error *ngIf="hasError('fuente')">
+        {{ getErrorMessage('fuente') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Confiabilidad -->
+    <mat-form-field appearance="outline" class="w-100 m-t-16">
+      <mat-label>Confiabilidad</mat-label>
+      <mat-select formControlName="confiabilidad">
+        <mat-option value="Alta">Alta</mat-option>
+        <mat-option value="Media">Media</mat-option>
+        <mat-option value="Baja">Baja</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Diagnóstico -->
+    <mat-form-field appearance="outline" class="w-100 m-t-16">
+      <mat-label>Diagnóstico</mat-label>
+      <textarea matInput 
+                formControlName="diagnostico" 
+                rows="3" 
+                required 
+                placeholder="Ingrese el diagnóstico">
+      </textarea>
+      <mat-error *ngIf="hasError('diagnostico')">
+        {{ getErrorMessage('diagnostico') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Signos Vitales -->
+    <div formGroupName="signos_vitales" class="m-t-24">
+      <h3>Signos Vitales</h3>
+
+      <div class="d-flex gap-2 flex-wrap">
+
+        <!-- Presión Arterial -->
+        <mat-form-field appearance="outline" class="flex-1 min-w-200">
+          <mat-label>Presión Arterial</mat-label>
+          <input matInput 
+                 formControlName="presion_arterial" 
+                 type="text" 
+                 required 
+                 placeholder="120/80" />
+          <mat-error *ngIf="hasError('signos_vitales.presion_arterial')">
+            {{ getErrorMessage('signos_vitales.presion_arterial') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Frecuencia Cardíaca -->
+        <mat-form-field appearance="outline" class="flex-1 min-w-200">
+          <mat-label>Frecuencia Cardíaca (bpm)</mat-label>
+          <input matInput 
+                 formControlName="frecuencia_cardiaca" 
+                 type="number" 
+                 required 
+                 min="30" 
+                 max="200"
+                 placeholder="72" />
+          <mat-error *ngIf="hasError('signos_vitales.frecuencia_cardiaca')">
+            {{ getErrorMessage('signos_vitales.frecuencia_cardiaca') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Temperatura -->
+        <mat-form-field appearance="outline" class="flex-1 min-w-200">
+          <mat-label>Temperatura (°C)</mat-label>
+          <input matInput 
+                 formControlName="temperatura" 
+                 type="number" 
+                 step="0.1" 
+                 required 
+                 min="30" 
+                 max="45"
+                 placeholder="36.5" />
+          <mat-error *ngIf="hasError('signos_vitales.temperatura')">
+            {{ getErrorMessage('signos_vitales.temperatura') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Saturación de Oxígeno -->
+        <mat-form-field appearance="outline" class="flex-1 min-w-200">
+          <mat-label>Saturación O₂ (%)</mat-label>
+          <input matInput 
+                 formControlName="saturacion_oxigeno" 
+                 type="number" 
+                 required 
+                 min="70" 
+                 max="100"
+                 placeholder="98" />
+          <mat-error *ngIf="hasError('signos_vitales.saturacion_oxigeno')">
+            {{ getErrorMessage('signos_vitales.saturacion_oxigeno') }}
+          </mat-error>
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- Estado del formulario para debugging (opcional, puedes quitarlo) -->
+    <div class="m-t-16" *ngIf="historiaform.invalid && (historiaform.dirty || historiaform.touched)">
+      <mat-error>
+        <small>Por favor, complete todos los campos requeridos correctamente.</small>
+      </mat-error>
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex justify-content-end gap-2 m-t-24">
+      <button mat-button type="button" (click)="cancelar()" [disabled]="submitting">
+        Cancelar
+      </button>
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="submitting || historiaform.invalid">
+        {{ submitting ? 'Guardando...' : 'Guardar Historia' }}
+      </button>
+    </div>
+
+    <!-- Spinner -->
+    <div class="d-flex justify-content-center m-t-16" *ngIf="submitting">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+  </form>
+</mat-card>

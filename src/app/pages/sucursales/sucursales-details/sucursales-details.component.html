@@ -1,0 +1,249 @@
+<div class="sucursal-details-container">
+  <!-- Loading State -->
+  <div class="text-center p-4" *ngIf="loading">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="m-t-24 text-muted">Cargando información de la sucursal...</p>
+  </div>
+
+  <!-- Error State -->
+  <mat-card class="cardWithShadow error-card" *ngIf="error && !loading">
+    <mat-card-content class="text-center p-4">
+      <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+      <h3 class="m-t-16 m-b-8">Error al cargar la sucursal</h3>
+      <p class="text-muted m-b-24">No se pudo cargar la información de la sucursal. Por favor, intenta nuevamente.</p>
+      <button mat-flat-button color="primary" (click)="retry()" class="m-r-8">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+      <button mat-stroked-button (click)="onBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Volver
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Content -->
+  <div *ngIf="sucursal && !loading && !error">
+    <!-- Header Card -->
+    <mat-card class="cardWithShadow header-card m-b-24">
+      <mat-card-header>
+        <div mat-card-avatar class="sucursal-avatar">
+          <mat-icon [color]="getNivelColor()">{{ getTipoIcon() }}</mat-icon>
+        </div>
+        <mat-card-title class="sucursal-title">
+          {{ sucursal.nombre }}
+        </mat-card-title>
+        <mat-card-subtitle class="sucursal-subtitle">
+          {{ sucursal.tipo_establecimiento_display }} • {{ sucursal.nivel_display }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-actions class="header-actions">
+        <button mat-flat-button color="primary" (click)="onEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button mat-stroked-button color="warn" (click)="onDelete()">
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+        <button mat-stroked-button (click)="onBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Volver
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <div class="row">
+      <!-- Información General -->
+      <div class="col-lg-8">
+        <mat-card class="cardWithShadow info-card">
+          <mat-card-header>
+            <mat-card-title class="section-title">
+              <mat-icon class="m-r-8">info</mat-icon>
+              Información General
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="info-grid">
+              <!-- Nombre -->
+              <div class="info-item">
+                <div class="info-label">
+                  <mat-icon class="info-icon">business</mat-icon>
+                  <span>Nombre</span>
+                </div>
+                <div class="info-value">{{ sucursal.nombre }}</div>
+              </div>
+
+              <!-- Tipo de Establecimiento -->
+              <div class="info-item">
+                <div class="info-label">
+                  <mat-icon class="info-icon">category</mat-icon>
+                  <span>Tipo de Establecimiento</span>
+                </div>
+                <div class="info-value">
+                  <span class="type-badge" [class]="'type-' + sucursal.tipo_establecimiento">
+                    {{ sucursal.tipo_establecimiento_display }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Nivel de Atención -->
+              <div class="info-item">
+                <div class="info-label">
+                  <mat-icon class="info-icon">layers</mat-icon>
+                  <span>Nivel de Atención</span>
+                </div>
+                <div class="info-value">
+                  <span class="nivel-badge" [class]="'nivel-' + sucursal.nivel">
+                    {{ sucursal.nivel_display }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Dirección -->
+              <div class="info-item full-width">
+                <div class="info-label">
+                  <mat-icon class="info-icon">location_on</mat-icon>
+                  <span>Dirección</span>
+                </div>
+                <div class="info-value">{{ sucursal.direccion }}</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Información de Contacto -->
+      <div class="col-lg-4">
+        <mat-card class="cardWithShadow contact-card">
+          <mat-card-header>
+            <mat-card-title class="section-title">
+              <mat-icon class="m-r-8">contact_phone</mat-icon>
+              Contacto
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="contact-info">
+              <!-- Teléfono -->
+              <div class="contact-item">
+                <div class="contact-label">
+                  <mat-icon class="contact-icon">phone</mat-icon>
+                  <span>Teléfono</span>
+                </div>
+                <div class="contact-value">
+                  <a [href]="'tel:' + sucursal.telefono" class="contact-link">
+                    {{ sucursal.telefono }}
+                  </a>
+                </div>
+              </div>
+
+              <!-- Correo -->
+              <div class="contact-item">
+                <div class="contact-label">
+                  <mat-icon class="contact-icon">email</mat-icon>
+                  <span>Correo</span>
+                </div>
+                <div class="contact-value">
+                  <a [href]="'mailto:' + sucursal.correo" class="contact-link">
+                    {{ sucursal.correo }}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Especialidades -->
+    <div class="row m-t-24">
+      <div class="col-12">
+        <mat-card class="cardWithShadow especialidades-card">
+          <mat-card-header>
+            <mat-card-title class="section-title">
+              <mat-icon class="m-r-8">medical_services</mat-icon>
+              Especialidades Médicas
+              <span class="especialidades-count" *ngIf="sucursal.especialidades?.length">
+                ({{ sucursal.especialidades.length }})
+              </span>
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Con especialidades -->
+            <div *ngIf="sucursal.especialidades && sucursal.especialidades.length > 0" class="especialidades-container">
+              <mat-chip-set class="especialidades-chips">
+                <mat-chip 
+                  *ngFor="let especialidad of sucursal.especialidades; trackBy: trackByEspecialidad"
+                  class="especialidad-chip">
+                  <mat-icon matChipAvatar>medical_services</mat-icon>
+                  <span class="especialidad-nombre">{{ especialidad.nombre }}</span>
+                  <div class="especialidad-descripcion" *ngIf="especialidad.descripcion">
+                    {{ especialidad.descripcion }}
+                  </div>
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <!-- Sin especialidades -->
+            <div *ngIf="!sucursal.especialidades || sucursal.especialidades.length === 0" class="no-especialidades">
+              <div class="empty-state">
+                <mat-icon class="empty-icon">medical_services</mat-icon>
+                <h4 class="empty-title">Sin especialidades registradas</h4>
+                <p class="empty-description">
+                  Esta sucursal no tiene especialidades médicas registradas actualmente.
+                </p>
+                <button mat-stroked-button color="primary" (click)="onEdit()" class="m-t-16">
+                  <mat-icon>add</mat-icon>
+                  Agregar Especialidades
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Información Adicional -->
+    <div class="row m-t-24">
+      <div class="col-12">
+        <mat-card class="cardWithShadow stats-card">
+          <mat-card-content>
+            <div class="stats-container">
+              <div class="stat-item">
+                <mat-icon class="stat-icon">business</mat-icon>
+                <div class="stat-content">
+                  <div class="stat-label">ID de Sucursal</div>
+                  <div class="stat-value">#{{ sucursal.id }}</div>
+                </div>
+              </div>
+              
+              <mat-divider [vertical]="true" class="stat-divider"></mat-divider>
+              
+              <div class="stat-item">
+                <mat-icon class="stat-icon">medical_services</mat-icon>
+                <div class="stat-content">
+                  <div class="stat-label">Especialidades</div>
+                  <div class="stat-value">{{ sucursal.especialidades?.length || 0 }}</div>
+                </div>
+              </div>
+              
+              <mat-divider [vertical]="true" class="stat-divider"></mat-divider>
+              
+              <div class="stat-item">
+                <mat-icon class="stat-icon">layers</mat-icon>
+                <div class="stat-content">
+                  <div class="stat-label">Nivel</div>
+                  <div class="stat-value">{{ sucursal.nivel_display }}</div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,433 @@
+<mat-card class="bitacora-card">
+  <mat-card-header class="bitacora-header">
+    <mat-card-title class="bitacora-title">
+      <mat-icon class="title-icon">assignment</mat-icon>
+      Registro de Bitácora
+    </mat-card-title>
+    <div class="header-actions">
+      <button mat-icon-button (click)="toggleFilters()" [color]="showFilters ? 'accent' : 'primary'"
+        matTooltip="Filtros de búsqueda">
+        <mat-icon>filter_list</mat-icon>
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-divider></mat-divider>
+
+  <!-- Sección de filtros -->
+  <mat-card-content class="filters-section" *ngIf="showFilters">
+    <form [formGroup]="filterForm" class="filters-form">
+      <div class="filters-grid">
+
+        <!-- Búsqueda general -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput formControlName="search" placeholder="Buscar por acción, usuario o email..."
+            [disabled]="loading">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Filtro por usuario -->
+        <mat-form-field appearance="outline">
+          <mat-label>Usuario</mat-label>
+          <mat-select formControlName="usuario" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos los usuarios</mat-option>
+            <mat-option *ngFor="let usuario of usuarios" [value]="usuario.id">
+              {{usuario.nombre}} {{usuario.apellido}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por IP -->
+        <mat-form-field appearance="outline">
+          <mat-label>Dirección IP</mat-label>
+          <mat-select formControlName="ip" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todas las IPs</mat-option>
+            <mat-option *ngFor="let ip of ips" [value]="ip">
+              {{ip}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Fecha inicio -->
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha desde</mat-label>
+          <input matInput [matDatepicker]="fechaInicio" formControlName="fecha_inicio" (dateChange)="onFilterChange()">
+          <mat-datepicker-toggle matSuffix [for]="fechaInicio"></mat-datepicker-toggle>
+          <mat-datepicker #fechaInicio></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Fecha fin -->
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha hasta</mat-label>
+          <input matInput [matDatepicker]="fechaFin" formControlName="fecha_fin" (dateChange)="onFilterChange()">
+          <mat-datepicker-toggle matSuffix [for]="fechaFin"></mat-datepicker-toggle>
+          <mat-datepicker #fechaFin></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Ordenamiento -->
+        <mat-form-field appearance="outline">
+          <mat-label>Ordenar por</mat-label>
+          <mat-select formControlName="ordering" (selectionChange)="onFilterChange()">
+            <mat-option value="-timestamp">Fecha (más reciente primero)</mat-option>
+            <mat-option value="timestamp">Fecha (más antiguo primero)</mat-option>
+            <mat-option value="usuario__nombre">Usuario (A-Z)</mat-option>
+            <mat-option value="-usuario__nombre">Usuario (Z-A)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filters-actions">
+        <button mat-raised-button color="primary" (click)="onFilterChange()" [disabled]="loading">
+          <mat-icon>search</mat-icon>
+          Aplicar Filtros
+        </button>
+        <button mat-stroked-button (click)="limpiarFiltros()" [disabled]="loading">
+          <mat-icon>clear</mat-icon>
+          Limpiar
+        </button>
+      </div>
+    </form>
+    <mat-divider></mat-divider>
+  </mat-card-content>
+
+  <!-- Sección de configuración PDF -->
+  <div class="pdf-config-section" *ngIf="showPDFConfig">
+    <mat-expansion-panel class="pdf-panel" [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon class="config-icon">picture_as_pdf</mat-icon>
+          Configuración del PDF
+        </mat-panel-title>
+        <mat-panel-description>
+          Personaliza el formato y contenido del reporte
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="pdf-config-content">
+        <!-- Configuración General -->
+        <div class="config-section">
+          <h4 class="section-title">
+            <mat-icon>settings</mat-icon>
+            Configuración General
+          </h4>
+
+          <div class="config-grid">
+            <!-- Título del documento -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Título del documento</mat-label>
+              <input matInput [(ngModel)]="pdfConfig.titulo" placeholder="Ingrese el título del reporte">
+              <mat-icon matSuffix>title</mat-icon>
+            </mat-form-field>
+
+            <!-- Orientación -->
+            <mat-form-field appearance="outline">
+              <mat-label>Orientación</mat-label>
+              <mat-select [(ngModel)]="pdfConfig.orientacion" (selectionChange)="onPDFConfigChange()">
+                <mat-option value="portrait">
+                  <mat-icon>portrait</mat-icon>
+                  Vertical
+                </mat-option>
+                <mat-option value="landscape">
+                  <mat-icon>landscape</mat-icon>
+                  Horizontal
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Tamaño de fuente -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tamaño de fuente</mat-label>
+              <mat-select [(ngModel)]="pdfConfig.tamanoFuente" (selectionChange)="onPDFConfigChange()">
+                <mat-option [value]="8">8pt (Muy pequeño)</mat-option>
+                <mat-option [value]="9">9pt (Pequeño)</mat-option>
+                <mat-option [value]="10">10pt (Normal)</mat-option>
+                <mat-option [value]="11">11pt (Mediano)</mat-option>
+                <mat-option [value]="12">12pt (Grande)</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Máximo de registros -->
+            <mat-form-field appearance="outline">
+              <mat-label>Máximo de registros</mat-label>
+              <mat-select [(ngModel)]="pdfConfig.maxRegistros" (selectionChange)="onPDFConfigChange()">
+                <mat-option [value]="100">100 registros</mat-option>
+                <mat-option [value]="500">500 registros</mat-option>
+                <mat-option [value]="1000">1,000 registros</mat-option>
+                <mat-option [value]="2000">2,000 registros</mat-option>
+                <mat-option [value]="5000">5,000 registros</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Contenido del PDF -->
+        <div class="config-section">
+          <h4 class="section-title">
+            <mat-icon>view_list</mat-icon>
+            Contenido del PDF
+          </h4>
+
+          <div class="content-options">
+            <div class="option-row">
+              <mat-slide-toggle [(ngModel)]="pdfConfig.incluirFiltros" (change)="onPDFConfigChange()" color="primary">
+                <div class="toggle-content">
+                  <mat-icon>filter_list</mat-icon>
+                  <span>Incluir filtros aplicados</span>
+                </div>
+              </mat-slide-toggle>
+              <small class="option-description">Muestra los filtros que se aplicaron al generar el reporte</small>
+            </div>
+
+            <div class="option-row">
+              <mat-slide-toggle [(ngModel)]="pdfConfig.incluirResumen" (change)="onPDFConfigChange()" color="primary">
+                <div class="toggle-content">
+                  <mat-icon>summarize</mat-icon>
+                  <span>Incluir resumen estadístico</span>
+                </div>
+              </mat-slide-toggle>
+              <small class="option-description">Agrega estadísticas como total de registros, usuarios únicos,
+                etc.</small>
+            </div>
+
+            <div class="option-row">
+              <mat-slide-toggle [(ngModel)]="pdfConfig.incluirLogo" (change)="onPDFConfigChange()" color="primary">
+                <div class="toggle-content">
+                  <mat-icon>image</mat-icon>
+                  <span>Incluir logo institucional</span>
+                </div>
+              </mat-slide-toggle>
+              <small class="option-description">Agrega el logo de la institución en el encabezado</small>
+            </div>
+
+            <div class="option-row">
+              <mat-slide-toggle [(ngModel)]="pdfConfig.incluirPieDeReporte" (change)="onPDFConfigChange()"
+                color="primary">
+                <div class="toggle-content">
+                  <mat-icon>notes</mat-icon>
+                  <span>Incluir pie de reporte</span>
+                </div>
+              </mat-slide-toggle>
+              <small class="option-description">Agrega información adicional al final del documento</small>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Columnas a incluir -->
+        <div class="config-section">
+          <h4 class="section-title">
+            <mat-icon>view_column</mat-icon>
+            Columnas a incluir
+          </h4>
+
+          <div class="columns-grid">
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.usuario" (change)="onPDFConfigChange()" color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>person</mat-icon>
+                  <span>Usuario</span>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.accion" (change)="onPDFConfigChange()" color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>assignment</mat-icon>
+                  <span>Acción</span>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.timestamp" (change)="onPDFConfigChange()" color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Fecha/Hora</span>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.ip" (change)="onPDFConfigChange()" color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>router</mat-icon>
+                  <span>Dirección IP</span>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.establecimiento" (change)="onPDFConfigChange()"
+                color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>business</mat-icon>
+                  <span>Establecimiento</span>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="column-option">
+              <mat-checkbox [(ngModel)]="pdfConfig.columnas.rol" (change)="onPDFConfigChange()" color="primary">
+                <div class="checkbox-content">
+                  <mat-icon>security</mat-icon>
+                  <span>Rol</span>
+                </div>
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones del panel -->
+        <div class="pdf-actions">
+          <button mat-raised-button color="primary" (click)="exportarBitacoraPDF()" [disabled]="generandoPDF"
+            class="generate-btn">
+            <mat-icon *ngIf="!generandoPDF">picture_as_pdf</mat-icon>
+            <mat-progress-spinner *ngIf="generandoPDF" diameter="20" mode="indeterminate"></mat-progress-spinner>
+            {{ generandoPDF ? 'Generando...' : 'Generar PDF' }}
+          </button>
+
+          <button mat-stroked-button (click)="resetPDFConfig()" [disabled]="generandoPDF" class="reset-btn">
+            <mat-icon>refresh</mat-icon>
+            Restablecer
+          </button>
+
+          <button mat-icon-button (click)="togglePDFConfig()" matTooltip="Cerrar configuración" class="close-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </div>
+
+  <!-- Botón para abrir configuración PDF (reemplaza el botón simple) -->
+  <div class="pdf-export-container">
+    <button mat-raised-button color="primary" (click)="togglePDFConfig()" [disabled]="loading"
+      class="pdf-config-toggle">
+      <mat-icon>picture_as_pdf</mat-icon>
+      {{ showPDFConfig ? 'Ocultar Config PDF' : 'Configurar PDF' }}
+    </button>
+
+    <!-- Botón rápido para generar con configuración actual -->
+    <button mat-stroked-button color="primary" (click)="exportarBitacoraPDF()" [disabled]="loading || generandoPDF"
+      class="pdf-quick-generate" matTooltip="Generar PDF con configuración actual">
+      <mat-icon *ngIf="!generandoPDF">download</mat-icon>
+      <mat-progress-spinner *ngIf="generandoPDF" diameter="20" mode="indeterminate"></mat-progress-spinner>
+      {{ generandoPDF ? 'Generando...' : 'Generar PDF' }}
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Tabla de datos -->
+  <div class="table-container" *ngIf="!loading">
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="bitacora" class="bitacora-table" matSort>
+
+        <!-- Usuario -->
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">
+            <mat-icon class="column-icon">person</mat-icon>
+            Usuario
+          </th>
+          <td mat-cell *matCellDef="let element" class="user-cell">
+            <div class="user-info">
+              <div class="user-avatar">
+                <mat-icon>account_circle</mat-icon>
+              </div>
+              <div class="user-details">
+                <div class="user-name">{{ element.usuario?.nombre }} {{ element.usuario?.apellido }}</div>
+                <div class="user-email">{{ element.usuario?.email }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Acción -->
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">
+            <mat-icon class="column-icon">assignment</mat-icon>
+            Acción
+          </th>
+          <td mat-cell *matCellDef="let element" class="action-cell">
+            <mat-chip-listbox>
+              <mat-chip-option [selected]="true" class="action-chip">
+                {{ element.accion }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </td>
+        </ng-container>
+
+        <!-- Timestamp -->
+        <ng-container matColumnDef="timestamp">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">
+            <mat-icon class="column-icon">schedule</mat-icon>
+            Fecha/Hora
+          </th>
+          <td mat-cell *matCellDef="let element" class="timestamp-cell">
+            <div class="timestamp-info">
+              <div class="date">{{ element.timestamp | date: 'shortDate' }}</div>
+              <div class="time">{{ element.timestamp | date: 'shortTime' }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- IP -->
+        <ng-container matColumnDef="ip">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">
+            <mat-icon class="column-icon">router</mat-icon>
+            IP
+          </th>
+          <td mat-cell *matCellDef="let element" class="ip-cell">
+            <code class="ip-code">{{ element.ip }}</code>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="header-cell actions-header">
+            <mat-icon class="column-icon">settings</mat-icon>
+            Acciones
+          </th>
+          <td mat-cell *matCellDef="let element" class="actions-cell">
+            <button mat-icon-button color="primary" matTooltip="Ver Detalles" (click)="abrirDetalles(element.id)"
+              class="action-button">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="bitacoraColumns" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: bitacoraColumns;" class="data-row"></tr>
+      </table>
+    </div>
+
+    <!-- Mensaje cuando no hay datos -->
+    <div class="no-data" *ngIf="bitacora.data.length === 0">
+      <mat-icon class="no-data-icon">search_off</mat-icon>
+      <h3>No se encontraron registros</h3>
+      <p>Intenta ajustar los filtros de búsqueda o verifica que existan datos en el sistema.</p>
+    </div>
+
+    <!-- Información de resultados -->
+    <div class="results-info" *ngIf="bitacora.data.length > 0">
+      <mat-icon>info</mat-icon>
+      <span>Mostrando {{ bitacora.data.length }} de {{ totalItems }} registros</span>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator #paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20, 50]"
+      [showFirstLastButtons]="true" class="bitacora-paginator">
+    </mat-paginator>
+  </div>
+</mat-card>

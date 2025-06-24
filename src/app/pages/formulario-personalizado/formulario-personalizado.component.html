@@ -1,0 +1,32 @@
+<div *ngIf="preguntas.length > 0">
+  <h3>📝 Formulario Personalizado</h3>
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <div *ngFor="let pregunta of preguntas" class="m-b-16">
+      <mat-form-field *ngIf="pregunta.tipo_dato === 'texto' || pregunta.tipo_dato === 'numero'" appearance="outline" class="w-100">
+        <mat-label>{{ pregunta.texto }}</mat-label>
+        <input matInput
+               [type]="pregunta.tipo_dato === 'numero' ? 'number' : 'text'"
+               [formControlName]="pregunta.id">
+      </mat-form-field>
+
+      <mat-checkbox *ngIf="pregunta.tipo_dato === 'booleano'"
+                    [formControlName]="pregunta.id">
+        {{ pregunta.texto }}
+      </mat-checkbox>
+
+      <mat-form-field *ngIf="pregunta.tipo_dato === 'fecha'" appearance="outline" class="w-100">
+        <mat-label>{{ pregunta.texto }}</mat-label>
+        <input matInput [matDatepicker]="picker" [formControlName]="pregunta.id">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
+  </form>
+</div>
+
+<div *ngIf="preguntas.length === 0">
+  <p>⚠️ No hay formulario personalizado definido para esta especialidad.</p>
+</div>
+

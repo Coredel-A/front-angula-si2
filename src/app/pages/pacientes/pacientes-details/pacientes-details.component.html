@@ -1,0 +1,425 @@
+<div class="container-fluid">
+  <!-- Spinner de carga -->
+  <div class="text-center p-4" *ngIf="loading">
+    <mat-spinner diameter="60"></mat-spinner>
+    <h3 class="m-t-16">Cargando información del paciente...</h3>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!loading && paciente">
+    <!-- Header con acciones -->
+    <div class="d-flex justify-content-between align-items-center m-b-24">
+      <div class="d-flex align-items-center">
+        <button mat-icon-button (click)="volverALista()" class="m-r-16">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h2 class="m-0">Detalles del Paciente</h2>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button mat-raised-button color="primary" (click)="crearHistoriaClinica()">
+          <mat-icon>add</mat-icon>
+          Crear Historia Clínica
+        </button>
+
+        <button mat-stroked-button color="primary" (click)="editarPaciente()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button mat-stroked-button color="warn" (click)="eliminarPaciente()">
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Información principal del paciente -->
+      <div class="col-lg-8">
+        <mat-card class="cardWithShadow theme-card m-b-24">
+          <mat-card-header>
+            <div mat-card-avatar class="avatar-circle">
+              {{ getIniciales() }}
+            </div>
+            <mat-card-title>
+              {{ paciente.nombre }} {{ paciente.apellido }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              CI: {{ paciente.ci }} • {{ calcularEdad(paciente.fecha_nacimiento) }} años
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Información básica -->
+            <div class="info-section">
+              <h3 class="section-title">
+                <mat-icon class="m-r-8">person</mat-icon>
+                Información Personal
+              </h3>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <span class="info-label">Nombre completo:</span>
+                    <span class="info-value">{{ paciente.nombre }} {{ paciente.apellido }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <span class="info-label">Cédula de Identidad:</span>
+                    <span class="info-value">{{ paciente.ci }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <span class="info-label">Sexo:</span>
+                    <span class="info-value">{{ getSexoLabel(paciente.sexo) }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <span class="info-label">Fecha de Nacimiento:</span>
+                    <span class="info-value">{{ formatearFecha(paciente.fecha_nacimiento) }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <span class="info-label">Edad:</span>
+                    <span class="info-value">{{ calcularEdad(paciente.fecha_nacimiento) }} años</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <mat-divider class="m-y-24"></mat-divider>
+
+            <!-- Información de contacto -->
+            <div class="info-section" *ngIf="tieneDatosContacto()">
+              <h3 class="section-title">
+                <mat-icon class="m-r-8">contact_phone</mat-icon>
+                Información de Contacto
+              </h3>
+
+              <div class="row">
+                <div class="col-md-6" *ngIf="paciente.telefono">
+                  <div class="info-item">
+                    <span class="info-label">Teléfono:</span>
+                    <span class="info-value">
+                      <a href="tel:{{ paciente.telefono }}" class="contact-link">
+                        <mat-icon class="small-icon">phone</mat-icon>
+                        {{ formatearTelefono(paciente.telefono) }}
+                      </a>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6" *ngIf="paciente.email">
+                  <div class="info-item">
+                    <span class="info-label">Correo Electrónico:</span>
+                    <span class="info-value">
+                      <a href="mailto:{{ paciente.email }}" class="contact-link">
+                        <mat-icon class="small-icon">email</mat-icon>
+                        {{ paciente.email }}
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <mat-divider class="m-y-24"></mat-divider>
+            </div>
+
+            <!-- Información de ubicación -->
+            <div class="info-section" *ngIf="tieneDatosUbicacion()">
+              <h3 class="section-title">
+                <mat-icon class="m-r-8">location_on</mat-icon>
+                Información de Ubicación
+              </h3>
+
+              <div class="row">
+                <div class="col-md-6" *ngIf="paciente.residencia">
+                  <div class="info-item">
+                    <span class="info-label">Residencia:</span>
+                    <span class="info-value">{{ paciente.residencia }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-12" *ngIf="paciente.direccion">
+                  <div class="info-item">
+                    <span class="info-label">Dirección:</span>
+                    <span class="info-value">{{ paciente.direccion }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <mat-divider class="m-y-24"></mat-divider>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="info-section" *ngIf="tieneDatosPersonales()">
+              <h3 class="section-title">
+                <mat-icon class="m-r-8">info</mat-icon>
+                Información Adicional
+              </h3>
+
+              <div class="row">
+                <div class="col-md-6" *ngIf="paciente.religion">
+                  <div class="info-item">
+                    <span class="info-label">Religión:</span>
+                    <span class="info-value">{{ paciente.religion }}</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6" *ngIf="paciente.ocupacion">
+                  <div class="info-item">
+                    <span class="info-label">Ocupación:</span>
+                    <span class="info-value">{{ paciente.ocupacion }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Sección de Historias Clínicas -->
+        <mat-card class="cardWithShadow theme-card m-b-24">
+          <mat-card-header>
+            <mat-card-title class="d-flex align-items-center">
+              <mat-icon class="m-r-8">description</mat-icon>
+              Historias Clínicas
+              <mat-chip class="m-l-8" [disabled]="true">{{ totalItems }}</mat-chip>
+            </mat-card-title>
+            <div class="spacer"></div>
+            <button mat-icon-button (click)="cargarHistoriasClinicas()" [disabled]="loadingHistorias">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Spinner de carga -->
+            <div class="text-center p-4" *ngIf="loadingHistorias">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p class="m-t-16 text-muted">Cargando historias clínicas...</p>
+            </div>
+
+            <!-- Lista de historias -->
+            <div *ngIf="!loadingHistorias">
+              <!-- Estado vacío -->
+              <div *ngIf="!tieneHistorias()" class="text-center p-4 empty-state">
+                <mat-icon class="large-icon text-muted">description</mat-icon>
+                <h4 class="m-t-16 text-muted">No hay historias clínicas registradas</h4>
+                <p class="text-muted">Este paciente aún no tiene historias clínicas.</p>
+                <button mat-raised-button color="primary" (click)="crearHistoriaClinica()" class="m-t-16">
+                  <mat-icon>add</mat-icon>
+                  Crear Primera Historia
+                </button>
+              </div>
+
+              <!-- Lista de historias -->
+              <div *ngIf="tieneHistorias()">
+                <div *ngFor="let historia of historias; trackBy: trackByHistoria" class="historia-item m-b-16">
+                  <mat-card class="historia-card">
+                    <mat-card-header>
+                      <div mat-card-avatar class="historia-avatar">
+                        <mat-icon>description</mat-icon>
+                      </div>
+                      <mat-card-title>
+                        {{ historia.especialidad_nombre || historia.motivo_consulta || 'Historia Clínica' }}
+                      </mat-card-title>
+                      <mat-card-subtitle>
+                        <div class="d-flex align-items-center">
+                          <mat-icon class="small-icon m-r-4">calendar_today</mat-icon>
+                          {{ formatearFechaCorta(historia.fecha) }}
+                          <span *ngIf="historia.especialidad_nombre" class="m-l-16">
+                            <mat-icon class="small-icon m-r-4">local_hospital</mat-icon>
+                            {{ historia.especialidad_nombre }}
+                          </span>
+                        </div>
+                      </mat-card-subtitle>
+                      <div class="spacer"></div>
+                      <button mat-icon-button [matMenuTriggerFor]="historiaMenu">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #historiaMenu="matMenu">
+                        <button mat-menu-item (click)="verHistoriaClinica(historia.id)">
+                          <mat-icon>visibility</mat-icon>
+                          Ver detalles
+                        </button>
+                        <button mat-menu-item (click)="editarHistoriaClinica(historia.id)">
+                          <mat-icon>edit</mat-icon>
+                          Editar
+                        </button>
+                      </mat-menu>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                      <!-- Motivo de consulta -->
+                      <div *ngIf="historia.motivo_consulta" class="historia-field m-b-12">
+                        <strong>Motivo de consulta:</strong>
+                        <p class="historia-text">{{ historia.motivo_consulta }}</p>
+                      </div>
+
+                      <!-- Diagnóstico -->
+                      <div *ngIf="historia.diagnostico" class="historia-field m-b-12">
+                        <strong>Diagnóstico:</strong>
+                        <p class="historia-text">{{ historia.diagnostico }}</p>
+                      </div>
+
+                      <!-- Signos vitales -->
+                      <div *ngIf="historia.signos_vitales" class="signos-vitales m-t-16">
+                        <strong>Signos Vitales:</strong>
+                        <div class="signos-grid">
+                          <div class="signo-item" *ngIf="historia.signos_vitales.presion_arterial">
+                            <mat-icon class="signo-icon">favorite</mat-icon>
+                            <span class="signo-label">PA:</span>
+                            <span class="signo-value">{{ historia.signos_vitales.presion_arterial }}</span>
+                          </div>
+                          <div class="signo-item" *ngIf="historia.signos_vitales.frecuencia_cardiaca">
+                            <mat-icon class="signo-icon">monitor_heart</mat-icon>
+                            <span class="signo-label">FC:</span>
+                            <span class="signo-value">{{ historia.signos_vitales.frecuencia_cardiaca }} bpm</span>
+                          </div>
+                          <div class="signo-item" *ngIf="historia.signos_vitales.temperatura">
+                            <mat-icon class="signo-icon">device_thermostat</mat-icon>
+                            <span class="signo-label">Temp:</span>
+                            <span class="signo-value">{{ historia.signos_vitales.temperatura }}°C</span>
+                          </div>
+                          <div class="signo-item" *ngIf="historia.signos_vitales.saturacion_oxigeno">
+                            <mat-icon class="signo-icon">air</mat-icon>
+                            <span class="signo-label">SpO2:</span>
+                            <span class="signo-value">{{ historia.signos_vitales.saturacion_oxigeno }}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Información adicional -->
+                      <div *ngIf="historia.fuente || historia.confiabilidad" class="historia-meta m-t-16">
+                        <div class="d-flex flex-wrap gap-2">
+                          <mat-chip *ngIf="historia.fuente" class="info-chip">
+                            <mat-icon matChipAvatar>source</mat-icon>
+                            {{ historia.fuente }}
+                          </mat-chip>
+                          <mat-chip *ngIf="historia.confiabilidad" class="info-chip">
+                            <mat-icon matChipAvatar>verified</mat-icon>
+                            {{ historia.confiabilidad }}
+                          </mat-chip>
+                        </div>
+                      </div>
+                    </mat-card-content>
+
+                    <mat-card-actions align="end">
+                      <button mat-button (click)="verHistoriaClinica(historia.id)">
+                        <mat-icon>visibility</mat-icon>
+                        Ver Detalles
+                      </button>
+                    </mat-card-actions>
+                  </mat-card>
+                </div>
+
+                <!-- Paginación -->
+                <mat-paginator
+                  *ngIf="totalItems > pageSize"
+                  [length]="totalItems"
+                  [pageSize]="pageSize"
+                  [pageSizeOptions]="[5, 10, 25, 50]"
+                  [pageIndex]="currentPage"
+                  (page)="onPageChange($event)"
+                  showFirstLastButtons>
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Panel lateral -->
+      <div class="col-lg-4">
+        <!-- Estado del seguro -->
+        <mat-card class="cardWithShadow theme-card m-b-24">
+          <mat-card-header>
+            <mat-card-title class="d-flex align-items-center">
+              <mat-icon class="m-r-8">security</mat-icon>
+              Estado del Seguro
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="text-center p-3">
+              <mat-chip [color]="getEstadoAseguradoColor(paciente.asegurado)" selected>
+                <mat-icon matChipAvatar>
+                  {{ paciente.asegurado ? 'verified' : 'person' }}
+                </mat-icon>
+                {{ getEstadoAseguradoLabel(paciente.asegurado) }}
+              </mat-chip>
+
+              <!-- Si no está asegurado, mostrar de quién es beneficiario -->
+              <div *ngIf="!paciente.asegurado && paciente.beneficiario_de" class="m-t-16">
+                <p class="text-muted m-b-8">Beneficiario de:</p>
+                <button mat-stroked-button (click)="verAsegurado()" class="w-100">
+                  <mat-icon>person</mat-icon>
+                  {{ paciente.beneficiario_de.nombre }} {{ paciente.beneficiario_de.apellido }}
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <!-- Lista de beneficiarios (solo si es asegurado) -->
+        <mat-card class="cardWithShadow theme-card" *ngIf="paciente.asegurado">
+          <mat-card-header>
+            <mat-card-title class="d-flex align-items-center">
+              <mat-icon class="m-r-8">family_restroom</mat-icon>
+              Beneficiarios
+              <mat-chip class="m-l-8" [disabled]="true">{{ beneficiarios.length }}</mat-chip>
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Spinner para beneficiarios -->
+            <div class="text-center p-3" *ngIf="loadingBeneficiarios">
+              <mat-spinner diameter="30"></mat-spinner>
+              <p class="m-t-8 text-muted">Cargando beneficiarios...</p>
+            </div>
+
+            <!-- Lista de beneficiarios -->
+            <div *ngIf="!loadingBeneficiarios">
+              <div *ngIf="beneficiarios.length === 0" class="text-center p-3 text-muted">
+                <mat-icon class="large-icon">person_off</mat-icon>
+                <p class="m-t-8">No tiene beneficiarios registrados</p>
+              </div>
+
+              <div *ngFor="let beneficiario of beneficiarios" class="beneficiario-item">
+                <button mat-stroked-button (click)="verBeneficiario(beneficiario.id)" class="w-100 beneficiario-button">
+                  <div class="d-flex align-items-center justify-content-between w-100">
+                    <div class="text-left">
+                      <div class="beneficiario-name">
+                        {{ beneficiario.nombre }} {{ beneficiario.apellido }}
+                      </div>
+                      <div class="beneficiario-ci text-muted">
+                        CI: {{ beneficiario.ci }}
+                      </div>
+                    </div>
+                    <mat-icon>chevron_right</mat-icon>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de error -->
+  <div class="text-center p-4" *ngIf="!loading && !paciente">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3 class="m-t-16">No se pudo cargar la información del paciente</h3>
+    <button mat-stroked-button (click)="volverALista()" class="m-t-16">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a la lista
+    </button>
+  </div>
+</div>

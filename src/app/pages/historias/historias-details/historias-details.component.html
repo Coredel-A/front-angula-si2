@@ -1,0 +1,340 @@
+<div *ngIf="loading" class="d-flex justify-center m-t-32">
+  <mat-spinner></mat-spinner>
+</div>
+
+<div *ngIf="!loading && historia" class="container m-t-24">
+  <mat-card class="historia-detalle-card">
+    <mat-card-header>
+      <div mat-card-avatar class="historia-avatar">
+        <mat-icon>description</mat-icon>
+      </div>
+      <mat-card-title>Detalles de la Historia Clínica</mat-card-title>
+      <mat-card-subtitle>
+        Fecha: {{ historia.fecha | date: 'fullDate' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <!-- Información básica de la historia -->
+      <div class="historia-info-grid">
+        <!-- Motivo de consulta -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>info</mat-icon>
+            <mat-card-title>Motivo de Consulta</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ historia.motivo_consulta || 'No especificado' }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Diagnóstico -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>healing</mat-icon>
+            <mat-card-title>Diagnóstico</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ historia.diagnostico || 'No especificado' }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Fuente -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>person_search</mat-icon>
+            <mat-card-title>Fuente</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ historia.fuente || 'No especificado' }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Confiabilidad -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>verified_user</mat-icon>
+            <mat-card-title>Confiabilidad</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ historia.confiabilidad || 'No especificada' }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Signos Vitales -->
+      <mat-card class="signos-vitales-card m-t-24">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="vital-signs-icon">favorite</mat-icon>
+          <mat-card-title>Signos Vitales</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="signos-grid">
+            <div class="signo-item" *ngIf="historia.signos_vitales.presion_arterial">
+              <mat-icon class="signo-icon">monitor_heart</mat-icon>
+              <div>
+                <strong>Presión Arterial</strong>
+                <p>{{ historia.signos_vitales.presion_arterial }}</p>
+              </div>
+            </div>
+            <div class="signo-item" *ngIf="historia.signos_vitales.frecuencia_cardiaca">
+              <mat-icon class="signo-icon">favorite</mat-icon>
+              <div>
+                <strong>Frecuencia Cardíaca</strong>
+                <p>{{ historia.signos_vitales.frecuencia_cardiaca }} bpm</p>
+              </div>
+            </div>
+            <div class="signo-item" *ngIf="historia.signos_vitales.temperatura">
+              <mat-icon class="signo-icon">device_thermostat</mat-icon>
+              <div>
+                <strong>Temperatura</strong>
+                <p>{{ historia.signos_vitales.temperatura }} °C</p>
+              </div>
+            </div>
+            <div class="signo-item" *ngIf="historia.signos_vitales.saturacion_oxigeno">
+              <mat-icon class="signo-icon">air</mat-icon>
+              <div>
+                <strong>Saturación de Oxígeno</strong>
+                <p>{{ historia.signos_vitales.saturacion_oxigeno }}%</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Sección de Documentos Adjuntos -->
+      <div *ngIf="historia.documento_adjunto && historia.documento_adjunto.length > 0">
+        <mat-card class="documentos-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>attach_file</mat-icon>
+            <mat-card-title>Documentos Adjuntos</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="documentos-list">
+              <div *ngFor="let documento of historia.documento_adjunto">
+                <mat-chip class="documento-chip" color="primary">
+                  <mat-icon matChipAvatar>insert_drive_file</mat-icon>
+                  <span>{{ documento.tipo_documento }}</span>
+                  <button mat-icon-button (click)="descargarDocumento(documento.id)">
+                    <mat-icon>download</mat-icon>
+                  </button>
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Sección de adjuntar documentos -->
+      <mat-card class="adjuntar-documentos-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>attach_file</mat-icon>
+          <mat-card-title>Adjuntar Documento</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <input type="file" (change)="onFileSelect($event)" />
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="guardarDocumentoAdjunto()">Subir Documento</button>
+        </mat-card-actions>
+      </mat-card>
+
+
+
+      <mat-divider class="m-t-24 m-b-24"></mat-divider>
+
+      <!-- Formulario de Especialidad -->
+      <div class="formulario-section">
+        <h2 class="section-title">
+          <mat-icon class="section-icon">assignment</mat-icon>
+          Formulario de Especialidad
+        </h2>
+
+        <!-- Mostrar formulario completado si ya hay uno asignado -->
+        <div *ngIf="historia.formulario && tieneRespuestasGuardadas()" class="m-b-24">
+          <mat-card class="formulario-completado-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="success-icon">check_circle</mat-icon>
+              <mat-card-title class="text-success">{{ historia.formulario.nombre }}</mat-card-title>
+              <mat-card-subtitle>Formulario completado</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="respuestas-grid">
+                <div *ngFor="let respuesta of historia.preguntas_respuestas" class="respuesta-item">
+                  <div class="pregunta-text">{{ respuesta.texto }}</div>
+                  <div class="respuesta-valor">
+                    <mat-chip-set>
+                      <mat-chip>{{ respuesta.respuesta || 'Sin respuesta' }}</mat-chip>
+                    </mat-chip-set>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Solo mostrar la selección de formulario si no tiene un formulario asignado o respuestas -->
+        <mat-card class="formulario-selector-card" *ngIf="mostrarFormulario">
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>
+                <mat-icon class="m-r-4">list_alt</mat-icon>
+                {{ historia.formulario ? 'Cambiar formulario' : 'Seleccione el Formulario' }}
+              </mat-label>
+              <mat-select [(value)]="selectedFormularioId" (selectionChange)="onFormularioSeleccionado($event.value)">
+                <mat-option *ngFor="let formulario of formularios" [value]="formulario.id">
+                  <div class="formulario-option">
+                    <span>{{ formulario.nombre }}</span>
+                    <mat-chip *ngIf="historia.formulario?.id === formulario.id" class="actual-chip">
+                      Actual
+                    </mat-chip>
+                  </div>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Formulario de preguntas -->
+        <div *ngIf="mostrarFormulario && puedeEditarFormulario()" class="formulario-preguntas">
+          <mat-card class="preguntas-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>edit_note</mat-icon>
+              <mat-card-title>Completar Formulario</mat-card-title>
+              <mat-card-subtitle>Complete todas las preguntas obligatorias (*)</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="preguntas-container">
+                <div *ngFor="let pregunta of preguntas; trackBy: trackByPreguntaId" class="pregunta-wrapper">
+
+                  <!-- Campo de texto largo (textarea) -->
+                  <mat-form-field *ngIf="pregunta.tipo_dato === 'textarea'" appearance="outline" class="w-100">
+                    <mat-label>
+                      <mat-icon class="field-icon">text_fields</mat-icon>
+                      {{ pregunta.texto }}
+                      <span *ngIf="pregunta.obligatorio" class="required-asterisk">*</span>
+                    </mat-label>
+                    <textarea matInput [(ngModel)]="respuestas[pregunta.id]" [required]="pregunta.obligatorio"
+                      placeholder="Ingrese su respuesta"></textarea>
+                    <mat-hint *ngIf="pregunta.obligatorio">Campo obligatorio</mat-hint>
+                  </mat-form-field>
+
+                  <!-- Campo de texto -->
+                  <mat-form-field *ngIf="pregunta.tipo_dato === 'texto'" appearance="outline" class="w-100">
+                    <mat-label>
+                      <mat-icon class="field-icon">text_fields</mat-icon>
+                      {{ pregunta.texto }}
+                      <span *ngIf="pregunta.obligatorio" class="required-asterisk">*</span>
+                    </mat-label>
+                    <input matInput [(ngModel)]="respuestas[pregunta.id]" [required]="pregunta.obligatorio"
+                      placeholder="Ingrese su respuesta">
+                    <mat-hint *ngIf="pregunta.obligatorio">Campo obligatorio</mat-hint>
+                  </mat-form-field>
+
+                  <!-- Campo de número -->
+                  <mat-form-field *ngIf="pregunta.tipo_dato === 'numero'" appearance="outline" class="w-100">
+                    <mat-label>
+                      <mat-icon class="field-icon">pin</mat-icon>
+                      {{ pregunta.texto }}
+                      <span *ngIf="pregunta.obligatorio" class="required-asterisk">*</span>
+                    </mat-label>
+                    <input matInput type="number" [(ngModel)]="respuestas[pregunta.id]"
+                      [required]="pregunta.obligatorio" placeholder="Ingrese un número">
+                    <mat-hint *ngIf="pregunta.obligatorio">Campo obligatorio</mat-hint>
+                  </mat-form-field>
+
+                  <!-- Campo de fecha -->
+                  <mat-form-field *ngIf="pregunta.tipo_dato === 'fecha'" appearance="outline" class="w-100">
+                    <mat-label>
+                      <mat-icon class="field-icon">calendar_today</mat-icon>
+                      {{ pregunta.texto }}
+                      <span *ngIf="pregunta.obligatorio" class="required-asterisk">*</span>
+                    </mat-label>
+                    <input matInput type="date" [(ngModel)]="respuestas[pregunta.id]" [required]="pregunta.obligatorio">
+                    <mat-hint *ngIf="pregunta.obligatorio">Campo obligatorio</mat-hint>
+                  </mat-form-field>
+
+                  <!-- Campo booleano (Sí/No) -->
+                  <div *ngIf="pregunta.tipo_dato === 'booleano'" class="boolean-field">
+                    <label class="boolean-label">
+                      <mat-icon class="field-icon">help_outline</mat-icon>
+                      {{ pregunta.texto }}
+                      <span *ngIf="pregunta.obligatorio" class="required-asterisk">*</span>
+                    </label>
+                    <mat-radio-group [(ngModel)]="respuestas[pregunta.id]" class="radio-group-horizontal"
+                      [required]="pregunta.obligatorio">
+                      <mat-radio-button [value]="true" class="radio-option">
+                        <mat-icon class="radio-icon success">check_circle</mat-icon>
+                        Sí
+                      </mat-radio-button>
+                      <mat-radio-button [value]="false" class="radio-option">
+                        <mat-icon class="radio-icon error">cancel</mat-icon>
+                        No
+                      </mat-radio-button>
+                    </mat-radio-group>
+                    <div *ngIf="pregunta.obligatorio" class="field-hint">Campo obligatorio</div>
+                  </div>
+
+                </div>
+              </div>
+            </mat-card-content>
+
+            <!-- Botones de acción -->
+            <mat-card-actions class="form-actions">
+              <button mat-raised-button color="primary" (click)="guardarRespuestas()" [disabled]="savingRespuestas"
+                class="save-button">
+                <mat-icon *ngIf="!savingRespuestas">save</mat-icon>
+                <mat-spinner *ngIf="savingRespuestas" diameter="20"></mat-spinner>
+                {{ savingRespuestas ? 'Guardando...' : 'Guardar Respuestas' }}
+              </button>
+
+              <button mat-stroked-button color="warn" (click)="mostrarFormulario = false; selectedFormularioId = null"
+                class="cancel-button">
+                <mat-icon>close</mat-icon>
+                Cancelar
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <!-- Mensaje cuando no hay formularios -->
+        <mat-card *ngIf="formularios.length === 0" class="no-formularios-card">
+          <mat-card-content class="text-center">
+            <mat-icon class="large-icon">info</mat-icon>
+            <h3>Sin formularios disponibles</h3>
+            <p>No hay formularios disponibles para esta especialidad.</p>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+
+    </mat-card-content>
+
+    <mat-card-actions align="end" class="main-actions">
+      <button mat-raised-button color="accent" (click)="router.navigate(['/pacientes', historia.paciente, 'details'])">
+        <mat-icon>arrow_back</mat-icon>
+        Volver al paciente
+      </button>
+    </mat-card-actions>
+
+  </mat-card>
+</div>
+
+<div *ngIf="!loading && !historia" class="error-state">
+  <mat-card class="error-card">
+    <mat-card-content class="text-center">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h2>Historia no encontrada</h2>
+      <p>No se pudo encontrar la historia clínica solicitada.</p>
+      <button mat-raised-button color="primary" (click)="router.navigate(['/historias'])">
+        <mat-icon>arrow_back</mat-icon>
+        Volver a Historias
+      </button>
+    </mat-card-content>
+  </mat-card>
+</div>

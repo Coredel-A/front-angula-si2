@@ -1,0 +1,161 @@
+<!-- Card de filtros -->
+<mat-card class="filter-card" [formGroup]="filterForm">
+  <mat-card-header>
+    <mat-card-title>Filtros de Búsqueda</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Buscar por nombre</mat-label>
+        <input matInput formControlName="nombre" placeholder="Ingrese nombre del formulario">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Especialidad</mat-label>
+        <mat-select formControlName="especialidad">
+          <mat-option value="">Todas las especialidades</mat-option>
+          <mat-option *ngFor="let especialidad of especialidades.data" [value]="especialidad.id">
+            {{ especialidad.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="activo">
+          <mat-option value="">Todos</mat-option>
+          <mat-option [value]="true">Activos</mat-option>
+          <mat-option [value]="false">Inactivos</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="limpiarFiltros()" class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Limpiar
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Card de loading -->
+<mat-card *ngIf="loading" class="loading-card">
+  <div class="loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando formularios...</p>
+  </div>
+</mat-card>
+
+<!-- Card de la tabla -->
+<mat-card *ngIf="!loading" class="form-table-card">
+  <mat-card-header>
+    <mat-card-title>Lista de Formularios</mat-card-title>
+    <mat-card-subtitle>Total: {{ totalItems }} formularios</mat-card-subtitle>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" [routerLink]="['/formularios/crear']">
+        <mat-icon>add</mat-icon>
+        Crear Nuevo Formulario
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Tabla -->
+    <div class="table-container">
+      <mat-table [dataSource]="formularios" matSort class="mat-elevation-z2">
+
+        <!-- Columna Nombre -->
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            <strong>Nombre</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let formulario">
+            <div class="nombre-cell">
+              <span class="nombre-text">{{ formulario.nombre }}</span>
+              <mat-chip *ngIf="!formulario.activo" color="warn" selected>
+                <mat-icon matChipAvatar>block</mat-icon>
+                Inactivo
+              </mat-chip>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Especialidad -->
+        <ng-container matColumnDef="especialidad">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            <strong>Especialidad</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let formulario">
+            <mat-chip color="primary" selected>
+              {{ formulario.especialidad_nombre }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Estado Activo -->
+        <ng-container matColumnDef="activo">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            <strong>Estado</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let formulario">
+            <mat-slide-toggle [checked]="formulario.activo" (change)="toggleActivoFormulario(formulario)"
+              [matTooltip]="formulario.activo ? 'Desactivar formulario' : 'Activar formulario'">
+            </mat-slide-toggle>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Fecha de Creación -->
+        <ng-container matColumnDef="fecha_creacion">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            <strong>Fecha Creación</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let formulario">
+            <span *ngIf="formulario.fecha_creacion">
+              {{ formulario.fecha_creacion | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!formulario.fecha_creacion" class="no-data">
+              No disponible
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef>
+            <strong>Acciones</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let formulario">
+            <div class="actions-cell">
+              <button mat-icon-button color="primary" (click)="verFormulario(formulario)" matTooltip="Ver detalles">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Fila de headers y datos -->
+        <mat-header-row *matHeaderRowDef="formularioColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: formularioColumns;" class="table-row"></mat-row>
+
+        <!-- Mensaje cuando no hay datos -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell no-data-cell" [attr.colspan]="formularioColumns.length">
+            <div class="no-data-message">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron formularios</p>
+              <button mat-stroked-button (click)="limpiarFiltros()">
+                Limpiar filtros
+              </button>
+            </div>
+          </td>
+        </tr>
+      </mat-table>
+    </div>
+
+    <!-- Paginación -->
+    <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="currentPage"
+      [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" [showFirstLastButtons]="true"
+      class="table-paginator">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

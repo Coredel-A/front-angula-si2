@@ -1,0 +1,30 @@
+<mat-card *ngIf="!loading && bitacora">
+  <mat-card-header>
+    <mat-card-title>Detalles de la Bitácora</mat-card-title>
+    <mat-card-subtitle>Acción registrada</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p><strong>Acción:</strong> {{ bitacora.accion }}</p>
+    <p><strong>Fecha y Hora:</strong> {{ bitacora.timestamp | date:'medium' }}</p>
+    <p><strong>Dirección IP:</strong> {{ bitacora.ip }}</p>
+
+    <mat-divider class="my-3"></mat-divider>
+
+    <h4>Información del Usuario</h4>
+    <p><strong>Nombre:</strong> {{ bitacora?.usuario?.nombre }} {{ bitacora?.usuario?.apellido }}</p>
+    <p><strong>Email:</strong> {{ bitacora?.usuario?.email }}</p>
+    <p><strong>Rol:</strong> {{ bitacora?.usuario?.rol?.nombre || 'Sin rol' }}</p>
+    <p><strong>Especialidad:</strong> {{ bitacora?.usuario?.especialidad?.nombre || 'Ninguna' }}</p>
+    <p><strong>Establecimiento:</strong> {{ bitacora?.usuario?.establecimiento?.nombre || 'Ninguno' }}</p>
+
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-flat-button color="primary" (click)="cerrar()">Cerrar</button>
+  </mat-card-actions>
+</mat-card>
+
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner></mat-spinner>
+</div>

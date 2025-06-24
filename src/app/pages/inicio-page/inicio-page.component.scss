@@ -1,0 +1,298 @@
+.user-profile-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  .profile-header {
+    margin-bottom: 24px;
+    
+    .header-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 16px;
+        
+        .user-avatar {
+          .avatar-icon {
+            font-size: 80px;
+            width: 80px;
+            height: 80px;
+            color: rgba(255, 255, 255, 0.9);
+          }
+        }
+        
+        .user-info {
+          flex: 1;
+          
+          .user-name {
+            margin: 0 0 8px 0;
+            font-size: 2rem;
+            font-weight: 300;
+            color: white;
+          }
+          
+          .user-role {
+            margin: 0 0 16px 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: white;
+          }
+          
+          mat-chip {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            
+            mat-icon {
+              color: white;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .profile-content {
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      
+      .info-card {
+        height: fit-content;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        mat-card-header {
+          margin-bottom: 16px;
+          
+          div[mat-card-avatar] {
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            mat-icon {
+              color: #666;
+            }
+          }
+          
+          mat-card-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #333;
+          }
+          
+          mat-card-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+          }
+        }
+        
+        mat-card-content {
+          .detail-list {
+            .detail-row {
+              display: flex;
+              align-items: center;
+              padding: 12px 0;
+              border-bottom: 1px solid #f0f0f0;
+              
+              &:last-child {
+                border-bottom: none;
+              }
+              
+              .detail-icon {
+                color: #666;
+                margin-right: 16px;
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+              
+              .detail-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                
+                .label {
+                  font-size: 0.875rem;
+                  color: #666;
+                  font-weight: 500;
+                }
+                
+                .value {
+                  font-size: 1rem;
+                  color: #333;
+                  word-break: break-word;
+                }
+              }
+            }
+          }
+          
+          .especialidades-container,
+          .permisos-container {
+            mat-chip-set {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              
+              mat-chip {
+                margin: 4px;
+                
+                mat-icon {
+                  font-size: 16px;
+                  width: 16px;
+                  height: 16px;
+                }
+              }
+            }
+          }
+        }
+        
+        &.permisos-card {
+          grid-column: 1 / -1;
+          
+          .permisos-container {
+            max-height: 300px;
+            overflow-y: auto;
+            
+            mat-chip-set {
+              mat-chip {
+                font-size: 0.8rem;
+                height: 32px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .user-profile-container {
+    padding: 16px;
+    
+    .profile-header {
+      .header-card {
+        .user-header {
+          flex-direction: column;
+          text-align: center;
+          gap: 16px;
+          
+          .user-avatar {
+            .avatar-icon {
+              font-size: 60px;
+              width: 60px;
+              height: 60px;
+            }
+          }
+          
+          .user-info {
+            .user-name {
+              font-size: 1.5rem;
+            }
+            
+            .user-role {
+              font-size: 1rem;
+            }
+          }
+        }
+      }
+    }
+    
+    .profile-content {
+      .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        
+        .info-card {
+          mat-card-content {
+            .detail-list {
+              .detail-row {
+                .detail-content {
+                  .label {
+                    font-size: 0.8rem;
+                  }
+                  
+                  .value {
+                    font-size: 0.9rem;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .user-profile-container {
+    .profile-header {
+      .header-card {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+      }
+    }
+    
+    .profile-content {
+      .profile-grid {
+        .info-card {
+          background: #2d3748;
+          color: #e2e8f0;
+          
+          mat-card-header {
+            div[mat-card-avatar] {
+              background: #4a5568;
+              
+              mat-icon {
+                color: #e2e8f0;
+              }
+            }
+            
+            mat-card-title {
+              color: #e2e8f0;
+            }
+            
+            mat-card-subtitle {
+              color: #a0aec0;
+            }
+          }
+          
+          mat-card-content {
+            .detail-list {
+              .detail-row {
+                border-bottom-color: #4a5568;
+                
+                .detail-icon {
+                  color: #a0aec0;
+                }
+                
+                .detail-content {
+                  .label {
+                    color: #a0aec0;
+                  }
+                  
+                  .value {
+                    color: #e2e8f0;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,234 @@
+<div class="container">
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Cargando información del usuario...</p>
+    </div>
+
+    <!-- Usuario Details -->
+    <div *ngIf="!loading && usuario" class="usuario-details">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="header-content">
+                <div class="user-info">
+                    <mat-icon class="user-avatar">account_circle</mat-icon>
+                    <div class="user-title">
+                        <h1>{{ getNombreCompleto() }}</h1>
+                        <div class="user-status">
+                            <mat-chip [class]="usuario.is_active ? 'status-active' : 'status-inactive'"
+                                [disabled]="true">
+                                {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
+                            </mat-chip>
+                            <mat-chip *ngIf="usuario.is_staff" class="status-staff" [disabled]="true">
+                                Staff
+                            </mat-chip>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button mat-raised-button color="primary" (click)="editarUsuario()">
+                        <mat-icon>edit</mat-icon>
+                        Editar
+                    </button>
+                    <button mat-raised-button color="warn" (click)="eliminarUsuario()">
+                        <mat-icon>delete</mat-icon>
+                        Eliminar
+                    </button>
+                    <button mat-stroked-button (click)="volverALista()">
+                        <mat-icon>arrow_back</mat-icon>
+                        Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Cards -->
+        <div class="content-grid">
+
+            <!-- Información Personal -->
+            <mat-card class="info-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>person</mat-icon>
+                        Información Personal
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="info-row">
+                        <span class="info-label">ID:</span>
+                        <span class="info-value">{{ usuario.id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nombre:</span>
+                        <span class="info-value">{{ usuario.nombre }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Apellido:</span>
+                        <span class="info-value">{{ usuario.apellido }}</span>
+                    </div>
+                    <div class="info-row" *ngIf="usuario.fecha_nacimiento">
+                        <span class="info-label">Fecha de Nacimiento:</span>
+                        <span class="info-value">{{ formatearFecha(usuario.fecha_nacimiento) }}</span>
+                    </div>
+                    <div class="info-row" *ngIf="usuario.fecha_nacimiento">
+                        <span class="info-label">Edad:</span>
+                        <span class="info-value">{{ calcularEdad(usuario.fecha_nacimiento) }} años</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Fecha de Registro:</span>
+                        <span class="info-value">{{ formatearFecha(usuario.fecha_registro) }}</span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Información de Contacto -->
+            <mat-card class="info-card" *ngIf="tieneDatosContacto()">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>contact_mail</mat-icon>
+                        Información de Contacto
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">
+                            <a [href]="'mailto:' + usuario.email">{{ usuario.email }}</a>
+                        </span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Rol y Permisos -->
+            <mat-card class="info-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>security</mat-icon>
+                        Rol y Permisos
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="info-row" *ngIf="usuario.rol">
+                        <span class="info-label">Rol:</span>
+                        <span class="info-value">
+                            <mat-chip [disabled]="true" class="rol-chip">
+                                {{ usuario.rol.nombre }}
+                            </mat-chip>
+                        </span>
+                    </div>
+                    <div class="info-row" *ngIf="!usuario.rol">
+                        <span class="info-label">Rol:</span>
+                        <span class="info-value no-data">Sin rol asignado</span>
+                    </div>
+
+                    <mat-divider *ngIf="usuario.permisos && usuario.permisos.length > 0"></mat-divider>
+
+                    <div class="permisos-section" *ngIf="usuario.permisos && usuario.permisos.length > 0">
+                        <span class="info-label">Permisos:</span>
+                        <div class="permisos-container">
+                            <mat-chip *ngFor="let permiso of usuario.permisos" [disabled]="true" class="permiso-chip">
+                                {{ permiso }}
+                            </mat-chip>
+                        </div>
+                    </div>
+
+                    <div class="info-row" *ngIf="!usuario.permisos || usuario.permisos.length === 0">
+                        <span class="info-label">Permisos:</span>
+                        <span class="info-value no-data">Sin permisos específicos</span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Especialidad -->
+            <mat-card class="info-card" *ngIf="tieneEspecialidades()">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>medical_services</mat-icon>
+                        Especialidad
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="info-row">
+                        <span class="info-label">Nombre:</span>
+                        <span class="info-value">{{ usuario.especialidad?.nombre }}</span>
+                    </div>
+                    <div class="info-row" *ngIf="usuario.especialidad?.descripcion">
+                        <span class="info-label">Descripción:</span>
+                        <span class="info-value">{{ usuario.especialidad?.descripcion }}</span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Establecimiento -->
+            <mat-card class="info-card full-width" *ngIf="tieneEstablecimiento()">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>business</mat-icon>
+                        Establecimiento
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="establecimiento-grid">
+                        <div class="info-row">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value">{{ usuario.establecimiento?.nombre }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Tipo:</span>
+                            <span class="info-value">{{ usuario.establecimiento?.tipo_establecimiento_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Nivel:</span>
+                            <span class="info-value">{{ usuario.establecimiento?.nivel_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dirección:</span>
+                            <span class="info-value">{{ usuario.establecimiento?.direccion }}</span>
+                        </div>
+                        <div class="info-row" *ngIf="usuario.establecimiento?.telefono">
+                            <span class="info-label">Teléfono:</span>
+                            <span class="info-value">
+                                <a [href]="'tel:' + usuario.establecimiento?.telefono">
+                                    {{ usuario.establecimiento?.telefono }}
+                                </a>
+                            </span>
+                        </div>
+                        <div class="info-row" *ngIf="usuario.establecimiento?.correo">
+                            <span class="info-label">Correo:</span>
+                            <span class="info-value">
+                                <a [href]="'mailto:' + usuario.establecimiento?.correo">
+                                    {{ usuario.establecimiento?.correo }}
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Especialidades del Establecimiento -->
+                    <mat-divider *ngIf="tieneEspecialidades"></mat-divider>
+                    <div class="especialidades-section" *ngIf="tieneEspecialidades">
+
+                        <span class="info-label">Especialidades disponibles:</span>
+                        <div class="especialidades-container">
+                            <mat-chip *ngFor="let especialidad of usuario.establecimiento?.especialidades"
+                                [disabled]="true" class="especialidad-chip">
+                                {{ especialidad.nombre }}
+                            </mat-chip>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!loading && !usuario" class="error-state">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h2>Usuario no encontrado</h2>
+        <p>No se pudo cargar la información del usuario solicitado.</p>
+        <button mat-raised-button color="primary" (click)="volverALista()">
+            <mat-icon>arrow_back</mat-icon>
+            Volver a la lista
+        </button>
+    </div>
+</div>

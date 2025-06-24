@@ -1,0 +1,261 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Lista de Pacientes</mat-card-title>
+
+    <!-- Botón registrar -->
+    <div class="d-flex justify-content-end mb-3">
+      <button mat-flat-button color="primary" [routerLink]="['/pacientes/crear']">
+        + Registrar Paciente
+      </button>
+    </div>
+
+    <!-- Formulario de filtros -->
+    <form [formGroup]="filtrosForm" class="filtros-container">
+      
+      <!-- Búsqueda general -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Búsqueda general</mat-label>
+        <input matInput formControlName="busquedaGeneral" 
+               placeholder="Buscar por nombre, apellido o CI...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Botón para mostrar/ocultar filtros avanzados -->
+      <div class="d-flex align-items-center mb-3">
+        <button type="button" mat-button color="primary" 
+                (click)="toggleFiltrosAvanzados()">
+          <mat-icon>{{ mostrarFiltrosAvanzados ? 'expand_less' : 'expand_more' }}</mat-icon>
+          Filtros avanzados
+        </button>
+        
+        <button type="button" mat-button color="warn" 
+                (click)="limpiarFiltros()" 
+                *ngIf="filtrosActivos.length > 0"
+                class="ms-2">
+          <mat-icon>clear</mat-icon>
+          Limpiar filtros
+        </button>
+      </div>
+
+      <!-- Filtros avanzados (colapsables) -->
+      <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
+        <div class="row">
+          <!-- Nombre específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="nombre" placeholder="Filtrar por nombre">
+            </mat-form-field>
+          </div>
+
+          <!-- Apellido específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Apellido</mat-label>
+              <input matInput formControlName="apellido" placeholder="Filtrar por apellido">
+            </mat-form-field>
+          </div>
+
+          <!-- CI específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Cédula de Identidad</mat-label>
+              <input matInput formControlName="ci" placeholder="Filtrar por CI">
+            </mat-form-field>
+          </div>
+
+          <!-- Sexo -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Sexo</mat-label>
+              <mat-select formControlName="sexo">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let opcion of opcionesSexo" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Estado de asegurado -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Estado de seguro</mat-label>
+              <mat-select formControlName="asegurado">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let opcion of opcionesAsegurado" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Rango de fechas de nacimiento -->
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fecha nacimiento desde</mat-label>
+              <input matInput [matDatepicker]="pickerDesde" formControlName="fechaDesde">
+              <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDesde></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fecha nacimiento hasta</mat-label>
+              <input matInput [matDatepicker]="pickerHasta" formControlName="fechaHasta">
+              <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+              <mat-datepicker #pickerHasta></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Chips de filtros activos -->
+    <div class="filtros-activos mb-3" *ngIf="filtrosActivos.length > 0">
+      <mat-chip-listbox>
+        <mat-chip-option *ngFor="let filtro of filtrosActivos" 
+                         removable="true" 
+                         (removed)="eliminarFiltro(filtro)">
+          {{ filtro.label }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Indicador de resultados y loading -->
+    <div class="results-info mb-3">
+      <mat-chip-listbox>
+        <mat-chip-option selected *ngIf="!loading">
+          <mat-icon>info</mat-icon>
+          Mostrando {{ pacientes.data.length }} de {{ totalItems }} pacientes
+        </mat-chip-option>
+        <mat-chip-option selected *ngIf="loading">
+          <mat-icon>hourglass_empty</mat-icon>
+          Cargando...
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Spinner de carga -->
+    <div class="text-center mb-3" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+      <table mat-table [dataSource]="pacientes" class="w-100">
+
+        <!-- Nombre completo -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Paciente</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="paciente-info">
+              <strong>{{ element.nombre }} {{ element.apellido }}</strong><br>
+              <small class="text-muted">CI: {{ element.ci }}</small><br>
+              <small class="text-muted">
+                Sexo: {{ element.sexo === 'M' ? 'Masculino' : 'Femenino' }}
+              </small>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Teléfono -->
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Contacto</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="contacto-info">
+              <div *ngIf="element.telefono">
+                <mat-icon class="small-icon">phone</mat-icon>
+                <a href="tel:{{ element.telefono }}">{{ element.telefono }}</a>
+              </div>
+              <div *ngIf="element.email" class="mt-1">
+                <mat-icon class="small-icon">email</mat-icon>
+                <a href="mailto:{{ element.email }}">{{ element.email }}</a>
+              </div>
+              <div *ngIf="!element.telefono && !element.email">
+                <span class="text-muted">Sin contacto</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Email (columna combinada con teléfono arriba) -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Residencia</th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="element.residencia">
+              <mat-icon class="small-icon">location_on</mat-icon>
+              {{ element.residencia }}
+            </div>
+            <div *ngIf="element.direccion" class="text-muted small">
+              {{ element.direccion }}
+            </div>
+            <span *ngIf="!element.residencia && !element.direccion" class="text-muted">
+              No especificada
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Estado (asegurado/beneficiario) -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="estado-info">
+              <mat-chip-listbox>
+                <mat-chip-option [color]="element.asegurado ? 'primary' : 'warn'" selected>
+                  <mat-icon>{{ element.asegurado ? 'verified' : 'cancel' }}</mat-icon>
+                  {{ element.asegurado ? 'Asegurado' : 'No asegurado' }}
+                </mat-chip-option>
+              </mat-chip-listbox>
+              
+              <div *ngIf="element.beneficiario_de" class="mt-1">
+                <small class="text-muted">
+                  <mat-icon class="small-icon">group</mat-icon>
+                  Beneficiario de: {{ element.beneficiario_de.nombre }} {{ element.beneficiario_de.apellido }}
+                </small>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Acciones">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="verPaciente(element)">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver Detalles</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="pacientesColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: pacientesColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mensaje cuando no hay datos -->
+    <div class="text-center py-4" *ngIf="!loading && pacientes.data.length === 0">
+      <mat-icon class="large-icon text-muted">search_off</mat-icon>
+      <h4 class="text-muted">No se encontraron pacientes</h4>
+      <p class="text-muted">
+        {{ filtrosActivos.length > 0 ? 'Intenta ajustar los filtros de búsqueda' : 'No hay pacientes registrados aún' }}
+      </p>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator [length]="totalItems" 
+                   [pageSize]="pageSize" 
+                   [pageSizeOptions]="[5, 10, 20, 50]"
+                   [showFirstLastButtons]="true" 
+                   aria-label="Seleccionar página de pacientes">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

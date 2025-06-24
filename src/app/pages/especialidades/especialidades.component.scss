@@ -1,0 +1,13 @@
+.mat-cell,
+.mat-header-cell {
+  white-space: normal !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.descripcion-columna {
+  white-space: normal !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 400px; // o el ancho que prefieras
+}

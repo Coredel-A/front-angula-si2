@@ -1,0 +1,173 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title>Lista de Sucursales</mat-card-title>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button mat-flat-button color="primary" [routerLink]="['/sucursales/crear']">
+                + Registrar Sucursal
+            </button>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <mat-form-field appearance="outline" class="w-100 mb-4">
+            <mat-label>Buscar sucursal</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Escribe nombre, tipo, nivel, etc."
+                [value]="searchTerm">
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Botones de filtro -->
+        <div class="filter-buttons mb-4">
+            <h4 class="filter-title">Filtros:</h4>
+
+            <!-- Filtros generales -->
+            <div class="filter-group mb-3">
+                <button mat-raised-button [color]="filtroActivo === 'todos' ? 'primary' : ''" (click)="limpiarFiltros()"
+                    class="me-2 mb-2">
+                    <mat-icon>clear_all</mat-icon>
+                    Todos
+                </button>
+
+                <button mat-raised-button [color]="filtroActivo === 'con-especialidades' ? 'accent' : ''"
+                    (click)="filtrarConEspecialidades()" class="me-2 mb-2">
+                    <mat-icon>medical_services</mat-icon>
+                    Con Especialidades
+                </button>
+
+                <button mat-raised-button [color]="filtroActivo === 'sin-especialidades' ? 'warn' : ''"
+                    (click)="filtrarSinEspecialidades()" class="me-2 mb-2">
+                    <mat-icon>local_hospital</mat-icon>
+                    Sin Especialidades
+                </button>
+            </div>
+
+            <!-- Filtros por tipo -->
+            <div class="filter-group mb-3" *ngIf="tiposDisponibles.length > 0">
+                <h5>Por Tipo:</h5>
+                <button mat-stroked-button *ngFor="let tipo of tiposDisponibles"
+                    [color]="filtroActivo === tipo ? 'primary' : ''" (click)="filtrarPorTipo(tipo)" class="me-2 mb-2">
+                    <mat-icon>business</mat-icon>
+                    {{tipo}}
+                </button>
+            </div>
+
+            <!-- Filtros por nivel -->
+            <div class="filter-group mb-3" *ngIf="nivelesDisponibles.length > 0">
+                <h5>Por Nivel:</h5>
+                <button mat-stroked-button *ngFor="let nivel of nivelesDisponibles"
+                    [color]="filtroActivo === nivel ? 'accent' : ''" (click)="filtrarPorNivel(nivel)" class="me-2 mb-2">
+                    <mat-icon>layers</mat-icon>
+                    {{nivel}}
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicador de resultados y loading -->
+        <div class="results-info mb-3">
+            <mat-chip-listbox>
+                <mat-chip-option selected *ngIf="!loading">
+                    <mat-icon>info</mat-icon>
+                    Mostrando {{sucursales.data.length}} de {{totalItems}} sucursales
+                </mat-chip-option>
+                <mat-chip-option selected *ngIf="loading">
+                    <mat-icon>hourglass_empty</mat-icon>
+                    Cargando...
+                </mat-chip-option>
+            </mat-chip-listbox>
+        </div>
+
+        <!-- Spinner de carga -->
+        <div class="text-center mb-3" *ngIf="loading">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table mat-table [dataSource]="sucursales" class="w-100">
+
+                <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                    <td mat-cell *matCellDef="let element">
+                        <strong>{{ element.nombre }}</strong>
+                        <br>
+                        <small class="text-muted">{{ element.direccion }}</small>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="telefono">
+                    <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+                    <td mat-cell *matCellDef="let element">
+                        <a href="tel:{{ element.telefono }}" *ngIf="element.telefono">
+                            {{ element.telefono }}
+                        </a>
+                        <span *ngIf="!element.telefono" class="text-muted">No disponible</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="correo">
+                    <th mat-header-cell *matHeaderCellDef>Correo</th>
+                    <td mat-cell *matCellDef="let element">
+                        <a href="mailto:{{ element.correo }}" *ngIf="element.correo">
+                            {{ element.correo }}
+                        </a>
+                        <span *ngIf="!element.correo" class="text-muted">No disponible</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="tipo_establecimiento_display">
+                    <th mat-header-cell *matHeaderCellDef>Tipo de Establecimiento</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-chip-listbox>
+                            <mat-chip-option>{{ element.tipo_establecimiento_display }}</mat-chip-option>
+                        </mat-chip-listbox>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nivel_display">
+                    <th mat-header-cell *matHeaderCellDef>Nivel</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-chip-listbox>
+                            <mat-chip-option [ngClass]="{
+                                'nivel-1': element.nivel === 'nivel_1',
+                                'nivel-2': element.nivel === 'nivel_2', 
+                                'nivel-3': element.nivel === 'nivel_3'
+                            }">
+                                {{ element.nivel_display }}
+                            </mat-chip-option>
+                        </mat-chip-listbox>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Acciones">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="verDetalles(element)">
+                                <mat-icon>visibility</mat-icon>
+                                <span>Ver Detalles</span>
+                            </button>
+                        </mat-menu>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="sucursalesColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: sucursalesColumns"></tr>
+            </table>
+        </div>
+
+        <!-- Mensaje cuando no hay datos -->
+        <div class="text-center py-4" *ngIf="!loading && sucursales.data.length === 0">
+            <mat-icon class="large-icon text-muted">search_off</mat-icon>
+            <h4 class="text-muted">No se encontraron sucursales</h4>
+            <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+        </div>
+
+        <!-- Paginador -->
+        <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20, 50]"
+            showFirstLastButtons aria-label="Seleccionar página de sucursales">
+        </mat-paginator>
+    </mat-card-content>
+</mat-card>

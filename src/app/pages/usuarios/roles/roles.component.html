@@ -1,0 +1,189 @@
+<!-- Tabla de Roles -->
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Gestión de Roles</mat-card-title>
+
+    <!-- Botón para agregar nuevo rol -->
+    <div class="d-flex justify-content-between align-items-center m-b-16">
+      <h6 class="f-s-16 f-w-600">Lista de Roles</h6>
+      <button mat-raised-button color="primary" [routerLink]="['/roles/crear']">
+        <mat-icon>add</mat-icon>
+        Nuevo Rol
+      </button>
+    </div>
+
+    <!-- Spinner de carga -->
+    <div *ngIf="loading" class="d-flex justify-content-center p-16">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+
+    <!-- Tabla de Roles -->
+    <div class="table-responsive" *ngIf="!loading">
+      <table mat-table [dataSource]="roles" class="w-100">
+
+        <!-- Columna Nombre -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-l-0">
+            Nombre del Rol
+          </th>
+          <td mat-cell *matCellDef="let element" class="p-l-0">
+            <div class="d-flex align-items-center">
+              <mat-icon class="text-primary m-r-8">admin_panel_settings</mat-icon>
+              <div>
+                <h6 class="f-s-14 f-w-600 m-b-0">
+                  {{ element.nombre }}
+                </h6>
+                <span class="f-s-12 text-muted">ID: {{ element.id }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Permisos -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
+            Permisos Asignados
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="d-flex flex-wrap gap-4">
+              <mat-chip-set>
+                <mat-chip *ngFor="let permiso of element.permisos.slice(0, 3)" class="f-s-11" color="primary">
+                  {{ permiso.codename }}
+                </mat-chip>
+                <mat-chip *ngIf="element.permisos.length > 3" class="f-s-11 bg-light-primary text-primary">
+                  +{{ element.permisos.length - 3 }} más
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+            <span class="f-s-12 text-muted d-block m-t-4">
+              Total: {{ element.permisos.length }} permisos
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
+            Acciones
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button [matMenuTriggerFor]="menuRoles" aria-label="Menú de acciones">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menuRoles="matMenu">
+              <button mat-menu-item (click)="editarRol(element.id)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+
+              <mat-divider></mat-divider>
+              <button mat-menu-item class="text-error" (click)="eliminarRol(element.id)">
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Definir filas -->
+        <tr mat-header-row *matHeaderRowDef="rolesColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: rolesColumns"></tr>
+
+        <!-- Mensaje cuando no hay datos -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="rolesColumns.length">
+            <div class="text-center p-24">
+              <mat-icon class="text-muted" style="font-size: 48px;">folder_open</mat-icon>
+              <p class="text-muted m-t-8">No se encontraron roles</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator #paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]"
+      [showFirstLastButtons]="true" class="m-t-16">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>
+
+<!-- Separador -->
+<div class="m-t-24"></div>
+
+<!-- Tabla de Permisos -->
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Catálogo de Permisos</mat-card-title>
+
+    <div class="d-flex justify-content-between align-items-center m-b-16">
+      <h6 class="f-s-16 f-w-600">Lista de Permisos Disponibles</h6>
+
+      <!-- Filtro de búsqueda -->
+      <mat-form-field appearance="outline" class="w-300">
+        <mat-label>Buscar permisos</mat-label>
+        <input matInput placeholder="Buscar por código o descripción">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <!-- Tabla de Permisos -->
+    <div class="table-responsive">
+      <table mat-table [dataSource]="permisos" class="w-100">
+
+        <!-- Columna Código -->
+        <ng-container matColumnDef="codename">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-l-0">
+            Código del Permiso
+          </th>
+          <td mat-cell *matCellDef="let element" class="p-l-0">
+            <div class="d-flex align-items-center">
+              <mat-icon class="text-success m-r-8">verified_user</mat-icon>
+              <div>
+                <code class="f-s-13 f-w-500 bg-light-primary text-primary p-2 rounded">
+                  {{ element.codename }}
+                </code>
+                <span class="f-s-12 text-muted d-block m-t-2">ID: {{ element.id }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Descripción -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
+            Descripción
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <div>
+              <p class="f-s-14 m-b-0" *ngIf="element.descripcion; else noDescription">
+                {{ element.descripcion }}
+              </p>
+              <ng-template #noDescription>
+                <span class="f-s-14 text-muted font-italic">Sin descripción</span>
+              </ng-template>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Definir filas -->
+        <tr mat-header-row *matHeaderRowDef="permisosColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: permisosColumns"></tr>
+
+        <!-- Mensaje cuando no hay datos -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="permisosColumns.length">
+            <div class="text-center p-24">
+              <mat-icon class="text-muted" style="font-size: 48px;">security</mat-icon>
+              <p class="text-muted m-t-8">No se encontraron permisos</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <!-- Paginador de Permisos -->
+    <mat-paginator #paginatorPermisos [length]="totalItemsPermisos" [pageSize]="pageSizePermisos"
+      [pageSizeOptions]="[5, 10, 25, 100]" [showFirstLastButtons]="true" class="m-t-16">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

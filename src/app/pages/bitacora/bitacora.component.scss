@@ -1,0 +1,189 @@
+/* Estilos para la configuración PDF */
+.pdf-config-section {
+  margin: 16px 0;
+}
+
+.pdf-panel {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.pdf-config-content {
+  padding: 16px;
+}
+
+.config-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.section-divider {
+  margin: 20px 0;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.content-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-description {
+  color: #666;
+  font-size: 12px;
+  margin-left: 32px;
+}
+
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.column-option {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reset-btn, .close-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-export-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.pdf-config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-quick-generate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-icon {
+  color: #1976d2;
+  margin-right: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .columns-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pdf-actions {
+    flex-direction: column;
+  }
+  
+  .pdf-export-container {
+    flex-direction: column;
+  }
+}
+
+/* Animaciones */
+.pdf-config-section {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estados de carga */
+.generate-btn[disabled] {
+  opacity: 0.6;
+}
+
+/* Mejora visual para los toggles */
+.mat-slide-toggle {
+  margin-bottom: 8px;
+}
+
+.mat-slide-toggle .mat-slide-toggle-content {
+  width: 100%;
+}
+
+/* Estilos para checkboxes */
+.mat-checkbox {
+  width: 100%;
+}
+
+.mat-checkbox .mat-checkbox-layout {
+  width: 100%;
+}

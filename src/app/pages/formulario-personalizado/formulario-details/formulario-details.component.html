@@ -1,0 +1,334 @@
+<div class="formulario-details-container">
+  
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">
+      <span *ngIf="loadingFormulario">Cargando formulario...</span>
+      <span *ngIf="loadingEspecialidad">Cargando especialidad...</span>
+      <span *ngIf="loadingPreguntas">Cargando preguntas...</span>
+    </p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && formulario">
+    
+    <!-- Header con acciones -->
+    <mat-card class="header-card">
+      <mat-card-header>
+        <div class="header-content">
+          <div class="header-info">
+            <mat-card-title>
+              <mat-icon>assignment</mat-icon>
+              {{ formulario.nombre }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              Detalles del Formulario Personalizado
+            </mat-card-subtitle>
+          </div>
+          
+          <div class="header-actions">
+            <!-- Estado del formulario -->
+            <mat-chip-set>
+              <mat-chip 
+                [color]="formulario.activo ? 'primary' : 'warn'"
+                [highlighted]="true">
+                <mat-icon matChipAvatar>
+                  {{ formulario.activo ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+                {{ formulario.activo ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </mat-chip-set>
+
+            <!-- Menú de acciones -->
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionsMenu="matMenu">
+              <button mat-menu-item (click)="editarFormulario()">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button mat-menu-item (click)="duplicarFormulario()">
+                <mat-icon>content_copy</mat-icon>
+                <span>Duplicar</span>
+              </button>
+              <button mat-menu-item (click)="toggleEstadoFormulario()">
+                <mat-icon>{{ formulario.activo ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+                <span>{{ formulario.activo ? 'Desactivar' : 'Activar' }}</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="eliminarFormulario()" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </mat-card-header>
+    </mat-card>
+
+    <!-- Información General -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>info</mat-icon>
+          Información General
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="info-grid">
+          <!-- Nombre del formulario -->
+          <div class="info-item">
+            <div class="info-label">
+              <mat-icon>title</mat-icon>
+              Nombre del Formulario
+            </div>
+            <div class="info-value">{{ formulario.nombre }}</div>
+          </div>
+
+          <!-- Especialidad -->
+          <div class="info-item">
+            <div class="info-label">
+              <mat-icon>category</mat-icon>
+              Especialidad
+            </div>
+            <div class="info-value">
+              <span *ngIf="especialidad">{{ especialidad.nombre }}</span>
+              <span *ngIf="!especialidad && !loadingEspecialidad">No especificada</span>
+              <mat-spinner *ngIf="loadingEspecialidad" diameter="16"></mat-spinner>
+            </div>
+          </div>
+
+          <!-- ID del formulario -->
+          <div class="info-item">
+            <div class="info-label">
+              <mat-icon>fingerprint</mat-icon>
+              ID del Formulario
+            </div>
+            <div class="info-value">{{ formulario.id }}</div>
+          </div>
+
+          <!-- Estado -->
+          <div class="info-item">
+            <div class="info-label">
+              <mat-icon>toggle_on</mat-icon>
+              Estado
+            </div>
+            <div class="info-value">
+              <mat-chip 
+                [color]="formulario.activo ? 'primary' : 'warn'"
+                [highlighted]="true">
+                {{ formulario.activo ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción de la especialidad (si existe) -->
+        <div *ngIf="especialidad?.descripcion" class="especialidad-descripcion">
+          <mat-divider></mat-divider>
+          <h4>Descripción de la Especialidad</h4>
+          <p>{{ especialidad?.descripcion }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estadísticas -->
+    <mat-card class="stats-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>bar_chart</mat-icon>
+          Estadísticas del Formulario
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">{{ preguntas.length }}</div>
+            <div class="stat-label">
+              <mat-icon>quiz</mat-icon>
+              Total de Preguntas
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">{{ preguntasObligatorias }}</div>
+            <div class="stat-label">
+              <mat-icon>star</mat-icon>
+              Preguntas Obligatorias
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">{{ preguntasOpcionales }}</div>
+            <div class="stat-label">
+              <mat-icon>star_border</mat-icon>
+              Preguntas Opcionales
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">{{ totalItems }}</div>
+            <div class="stat-label">
+              <mat-icon>assessment</mat-icon>
+              Total de Respuestas
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Lista de Preguntas -->
+    <mat-card class="preguntas-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>help_outline</mat-icon>
+          Preguntas del Formulario
+          <mat-chip-set>
+            <mat-chip [highlighted]="true" [matBadge]="preguntas.length" matBadgeOverlap="false">
+              {{ preguntas.length }} {{ preguntas.length === 1 ? 'pregunta' : 'preguntas' }}
+            </mat-chip>
+          </mat-chip-set>
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Mensaje cuando no hay preguntas -->
+        <div *ngIf="preguntas.length === 0 && !loadingPreguntas" class="empty-preguntas">
+          <mat-icon class="large-icon">help_outline</mat-icon>
+          <h3>No hay preguntas en este formulario</h3>
+          <p>Este formulario aún no tiene preguntas configuradas.</p>
+          <button mat-raised-button color="primary" (click)="editarFormulario()">
+            <mat-icon>add</mat-icon>
+            Agregar Preguntas
+          </button>
+        </div>
+
+        <!-- Lista de preguntas -->
+        <div *ngIf="preguntas.length > 0" class="preguntas-list">
+          <div *ngFor="let pregunta of preguntas; let i = index" class="pregunta-item">
+            <mat-card class="pregunta-card">
+              <mat-card-header>
+                <div class="pregunta-header">
+                  <div class="pregunta-numero">
+                    <mat-icon>looks_{{ i + 1 }}</mat-icon>
+                    Pregunta {{ pregunta.orden }}
+                  </div>
+                  <div class="pregunta-badges">
+                    <!-- Badge de tipo de dato -->
+                    <mat-chip 
+                      [highlighted]="true"
+                      color="accent"
+                      [matTooltip]="'Tipo: ' + getTipoDatoInfo(pregunta.tipo_dato).label">
+                      <mat-icon matChipAvatar>{{ getTipoDatoInfo(pregunta.tipo_dato).icon }}</mat-icon>
+                      {{ getTipoDatoInfo(pregunta.tipo_dato).label }}
+                    </mat-chip>
+                    
+                    <!-- Badge de obligatorio -->
+                    <mat-chip 
+                      *ngIf="pregunta.obligatorio"
+                      [highlighted]="true"
+                      color="warn"
+                      matTooltip="Campo obligatorio">
+                      <mat-icon matChipAvatar>star</mat-icon>
+                      Obligatorio
+                    </mat-chip>
+                  </div>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="pregunta-content">
+                  <div class="pregunta-texto">
+                    {{ pregunta.texto }}
+                  </div>
+                  
+                  <!-- Información adicional -->
+                  <div class="pregunta-info">
+                    <div class="info-chips">
+                      <mat-chip-set>
+                        <mat-chip>
+                          <mat-icon matChipAvatar>sort</mat-icon>
+                          Orden: {{ pregunta.orden }}
+                        </mat-chip>
+                        <mat-chip>
+                          <mat-icon matChipAvatar>fingerprint</mat-icon>
+                          ID: {{ pregunta.id }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- Respuesta por defecto (si existe) -->
+                  <div *ngIf="pregunta.respuesta" class="respuesta-default">
+                    <mat-divider></mat-divider>
+                    <div class="respuesta-label">
+                      <mat-icon>edit</mat-icon>
+                      Respuesta por defecto:
+                    </div>
+                    <div class="respuesta-valor">{{ pregunta.respuesta }}</div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+
+        <!-- Paginación -->
+        <mat-paginator
+          *ngIf="totalItems > pageSize"
+          [length]="totalItems"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          [pageIndex]="currentPage"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Botones de navegación -->
+    <mat-card class="navigation-card">
+      <mat-card-content>
+        <div class="navigation-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="editarFormulario()">
+            <mat-icon>edit</mat-icon>
+            Editar Formulario
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            (click)="volver()">
+            <mat-icon>arrow_back</mat-icon>
+            Volver a la Lista
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && !formulario" class="error-container">
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error</mat-icon>
+          <h2>Formulario no encontrado</h2>
+          <p>No se pudo cargar la información del formulario solicitado.</p>
+          <button mat-raised-button color="primary" (click)="volver()">
+            <mat-icon>arrow_back</mat-icon>
+            Volver a la Lista
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

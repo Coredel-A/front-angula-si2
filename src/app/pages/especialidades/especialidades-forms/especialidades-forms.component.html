@@ -1,0 +1,47 @@
+<mat-card class="formCard p-24">
+  <mat-card-title class="m-b-16 f-s-20 f-w-600 text-primary">
+    {{ formTitle }}
+  </mat-card-title>
+
+  <form [formGroup]="especialidadForm" (ngSubmit)="onSubmit()" autocomplete="off">
+
+    <!-- Campo: Nombre -->
+    <mat-form-field appearance="outline" class="w-100 m-b-16">
+      <mat-label>Nombre de la especialidad</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej. Cardiología" />
+      <mat-error *ngIf="especialidadForm.get('nombre')?.hasError('required')">
+        El nombre es obligatorio
+      </mat-error>
+      <mat-error *ngIf="especialidadForm.get('nombre')?.hasError('minlength')">
+        Debe tener al menos 2 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Campo: Descripción -->
+    <mat-form-field appearance="outline" class="w-100 m-b-24">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="descripcion" rows="4" placeholder="Describe la especialidad"></textarea>
+      <mat-error *ngIf="especialidadForm.get('descripcion')?.hasError('required')">
+        La descripción es obligatoria
+      </mat-error>
+      <mat-error *ngIf="especialidadForm.get('descripcion')?.hasError('minlength')">
+        Debe tener al menos 10 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Botones -->
+    <div class="d-flex justify-content-end gap-16">
+      <button mat-button type="button" (click)="oncancel()" [disabled]="submitting">
+        Cancelar
+      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="submitting || especialidadForm.invalid">
+        {{ submitButtonText }}
+      </button>
+    </div>
+
+    <!-- Spinner opcional -->
+    <div class="d-flex justify-content-center p-t-16" *ngIf="loading || submitting">
+      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+    </div>
+  </form>
+</mat-card>

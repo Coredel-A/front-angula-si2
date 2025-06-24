@@ -1,0 +1,198 @@
+<div class="container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+                {{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Loading Spinner -->
+            <div *ngIf="loading" class="loading-container">
+                <mat-progress-spinner diameter="50" mode="indeterminate"></mat-progress-spinner>
+                <p>Cargando información del usuario...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!loading" [formGroup]="usuarioForm" (ngSubmit)="onSubmit()" class="usuario-form">
+
+                <!-- Información Personal -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <mat-icon>person</mat-icon>
+                        Información Personal
+                    </h3>
+
+                    <div class="form-row">
+                        <!-- Nombre -->
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Nombre</mat-label>
+                            <input matInput formControlName="nombre" placeholder="Ingrese el nombre" maxlength="100">
+                            <mat-icon matSuffix>person</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('nombre')">
+                                {{ getErrorMessage('nombre') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Apellido -->
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Apellido</mat-label>
+                            <input matInput formControlName="apellido" placeholder="Ingrese el apellido"
+                                maxlength="100">
+                            <mat-icon matSuffix>person_outline</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('apellido')">
+                                {{ getErrorMessage('apellido') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="!isEditMode" class="form-field">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Contraseña</mat-label>
+                            <input matInput type="password" formControlName="password" required>
+                            <mat-error *ngIf="isFieldInvalid('password')">
+                                {{ getErrorMessage('password') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="!isEditMode" class="form-field">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Confirmar contraseña</mat-label>
+                            <input matInput type="password" formControlName="confirmPassword" required>
+                            <mat-error *ngIf="isFieldInvalid('confirmPassword')">
+                                {{ getErrorMessage('confirmPassword') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+
+                    <div class="form-row">
+                        <!-- Email -->
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Correo Electrónico</mat-label>
+                            <input matInput formControlName="email" placeholder="ejemplo@correo.com" type="email"
+                                maxlength="100">
+                            <mat-icon matSuffix>email</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('email')">
+                                {{ getErrorMessage('email') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Fecha de Nacimiento -->
+                        <div class="col-lg-4">
+                            <mat-label class="f-w-600 m-b-8 d-block">
+                                Fecha de Nacimiento *
+                            </mat-label>
+                            <mat-form-field appearance="outline" class="w-100" color="primary">
+                                <input matInput type="date" formControlName="fecha_nacimiento">
+                                <mat-icon matSuffix>cake</mat-icon>
+                                <mat-error *ngIf="isFieldInvalid('fecha_nacimiento')">
+                                    {{ getErrorMessage('fecha_nacimiento') }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Profesional -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <mat-icon>work</mat-icon>
+                        Información Profesional
+                    </h3>
+
+                    <div class="form-row">
+                        <!-- Rol -->
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Rol</mat-label>
+                            <mat-select formControlName="rol" placeholder="Seleccione un rol">
+                                <mat-option [value]="null">Sin rol asignado</mat-option>
+                                <mat-option *ngFor="let rol of rolDisponibles" [value]="rol">
+                                    {{ rol.nombre }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matSuffix>badge</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('rol')">
+                                {{ getErrorMessage('rol') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Especialidad -->
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Especialidad</mat-label>
+                            <mat-select formControlName="especialidad" placeholder="Seleccione una especialidad">
+                                <mat-option [value]="null">Sin especialidad</mat-option>
+                                <mat-option *ngFor="let especialidad of especialidadesDisponibles"
+                                    [value]="especialidad">
+                                    {{ especialidad.nombre }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matSuffix>medical_services</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('especialidad')">
+                                {{ getErrorMessage('especialidad') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Establecimiento -->
+                        <mat-form-field appearance="outline" class="form-field full-width">
+                            <mat-label>Establecimiento</mat-label>
+                            <mat-select formControlName="establecimiento" placeholder="Seleccione un establecimiento">
+                                <mat-option [value]="null">Sin establecimiento asignado</mat-option>
+                                <mat-option *ngFor="let establecimiento of establecimientoDisponibles"
+                                    [value]="establecimiento">
+                                    {{ establecimiento.nombre }} - {{ establecimiento.tipo_establecimiento_display }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matSuffix>business</mat-icon>
+                            <mat-error *ngIf="isFieldInvalid('establecimiento')">
+                                {{ getErrorMessage('establecimiento') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="form-section info-section" *ngIf="isEditMode">
+                    <h3 class="section-title">
+                        <mat-icon>info</mat-icon>
+                        Información del Sistema
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <mat-icon>today</mat-icon>
+                            <span class="info-label">Fecha de Registro:</span>
+                            <span class="info-value">{{ usuarioForm.get('fecha_registro')?.value | date:'dd/MM/yyyy
+                                HH:mm' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <mat-icon>verified_user</mat-icon>
+                            <span class="info-label">Estado:</span>
+                            <span class="info-value status-active">Activo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="form-actions">
+                    <button type="button" mat-stroked-button color="primary" (click)="onCancel()"
+                        [disabled]="submitting">
+                        <mat-icon>cancel</mat-icon>
+                        Cancelar
+                    </button>
+
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="usuarioForm.invalid || submitting">
+                        <mat-icon *ngIf="!submitting">{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
+                        <mat-progress-spinner *ngIf="submitting" diameter="20" mode="indeterminate">
+                        </mat-progress-spinner>
+                        {{ submitting ? 'Procesando...' : (isEditMode ? 'Actualizar Usuario' : 'Crear Usuario') }}
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

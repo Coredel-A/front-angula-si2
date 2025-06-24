@@ -1,0 +1,273 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.historia-detalle-card {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 12px;
+}
+
+.historia-avatar {
+  background: linear-gradient(45deg, #2196F3, #21CBF3);
+  color: white;
+}
+
+.historia-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  border-left: 4px solid #2196F3;
+  transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.signos-vitales-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.vital-signs-icon {
+  background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+  color: white;
+}
+
+.signos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.signo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.signo-icon {
+  color: #FF6B6B;
+  font-size: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1976d2;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.section-icon {
+  color: #1976d2;
+}
+
+.formulario-completado-card {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f1f8f1 100%);
+  border-left: 4px solid #4caf50;
+}
+
+.success-icon {
+  background: #4caf50;
+  color: white;
+}
+
+.text-success {
+  color: #2e7d32;
+}
+
+.respuestas-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.respuesta-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pregunta-text {
+  font-weight: 500;
+  color: #333;
+}
+
+.formulario-selector-card,
+.preguntas-card {
+  margin-top: 16px;
+}
+
+.formulario-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.actual-chip {
+  background-color: #4caf50;
+  color: white;
+  font-size: 11px;
+}
+
+.preguntas-container {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.pregunta-wrapper {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 3px solid #2196F3;
+}
+
+.field-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.required-asterisk {
+  color: #f44336;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.boolean-field {
+  padding: 16px 0;
+}
+
+.boolean-label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.radio-group-horizontal {
+  display: flex;
+  gap: 24px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-icon {
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.radio-icon.success {
+  color: #4caf50;
+}
+
+.radio-icon.error {
+  color: #f44336;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.form-actions {
+  padding: 16px 24px;
+  background: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.save-button {
+  min-width: 160px;
+}
+
+.cancel-button {
+  min-width: 120px;
+}
+
+.no-formularios-card,
+.error-card {
+  text-align: center;
+  padding: 32px;
+}
+
+.large-icon,
+.error-icon {
+  font-size: 64px;
+  color: #757575;
+  margin-bottom: 16px;
+}
+
+.main-actions {
+  padding: 16px 24px;
+  background: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.m-t-24 { margin-top: 24px; }
+.m-b-24 { margin-bottom: 24px; }
+.m-t-16 { margin-top: 16px; }
+.m-b-16 { margin-bottom: 16px; }
+.m-r-4 { margin-right: 4px; }
+.m-r-8 { margin-right: 8px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .historia-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .signos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .radio-group-horizontal {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .save-button,
+  .cancel-button {
+    width: 100%;
+  }
+}

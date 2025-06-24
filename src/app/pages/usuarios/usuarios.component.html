@@ -1,0 +1,312 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Lista de Usuarios</mat-card-title>
+
+    <!-- Botón registrar -->
+    <div class="d-flex justify-content-end gap-2 mb-3">
+      <button mat-flat-button color="primary" [routerLink]="['/usuarios/crear']">
+        + Registrar Usuario
+      </button>
+      <button mat-flat-button color="primary" [routerLink]="['/roles/']">
+        Cargos y Permisos
+      </button>
+    </div>
+
+    <!-- Formulario de filtros -->
+    <form [formGroup]="filtrosForm" class="filtros-container">
+
+      <!-- Búsqueda general -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Búsqueda general</mat-label>
+        <input matInput formControlName="busquedaGeneral" placeholder="Buscar por nombre, apellido o email...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Botón para mostrar/ocultar filtros avanzados -->
+      <div class="d-flex align-items-center mb-3">
+        <button type="button" mat-button color="primary" (click)="toggleFiltrosAvanzados()">
+          <mat-icon>{{ mostrarFiltrosAvanzados ? 'expand_less' : 'expand_more' }}</mat-icon>
+          Filtros avanzados
+        </button>
+
+        <button type="button" mat-button color="warn" (click)="limpiarFiltros()" *ngIf="filtrosActivos.length > 0"
+          class="ms-2">
+          <mat-icon>clear</mat-icon>
+          Limpiar filtros
+        </button>
+      </div>
+
+      <!-- Filtros avanzados (colapsables) -->
+      <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
+        <div class="row">
+          <!-- Nombre específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="nombre" placeholder="Filtrar por nombre">
+            </mat-form-field>
+          </div>
+
+          <!-- Apellido específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Apellido</mat-label>
+              <input matInput formControlName="apellido" placeholder="Filtrar por apellido">
+            </mat-form-field>
+          </div>
+
+          <!-- Email específico -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" placeholder="Filtrar por email">
+            </mat-form-field>
+          </div>
+
+          <!-- Rol -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Cargo</mat-label>
+              <mat-select formControlName="rol">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let rol of rolesDisponibles" [value]="rol.id">
+                  {{ rol.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Especialidad -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Especialidad</mat-label>
+              <mat-select formControlName="especialidad">
+                <mat-option value="">Todas</mat-option>
+                <mat-option *ngFor="let especialidad of especialidadesDisponibles" [value]="especialidad.id">
+                  {{ especialidad.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Establecimiento -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Establecimiento</mat-label>
+              <mat-select formControlName="establecimiento">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let establecimiento of establecimientosDisponibles" [value]="establecimiento.id">
+                  {{ establecimiento.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Estado activo -->
+          <div class="col-md-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="is_active">
+                <mat-option value="">Todos</mat-option>
+                <mat-option value="true">Activo</mat-option>
+                <mat-option value="false">Inactivo</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Rango de fechas de nacimiento -->
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fecha nacimiento desde</mat-label>
+              <input matInput [matDatepicker]="pickerDesde" formControlName="fechaDesde">
+              <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDesde></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fecha nacimiento hasta</mat-label>
+              <input matInput [matDatepicker]="pickerHasta" formControlName="fechaHasta">
+              <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+              <mat-datepicker #pickerHasta></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Chips de filtros activos -->
+    <div class="filtros-activos mb-3" *ngIf="filtrosActivos.length > 0">
+      <mat-chip-listbox>
+        <mat-chip-option *ngFor="let filtro of filtrosActivos" removable="true" (removed)="eliminarFiltro(filtro)">
+          {{ filtro.label }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Indicador de resultados y loading -->
+    <div class="results-info mb-3">
+      <mat-chip-listbox>
+        <mat-chip-option selected *ngIf="!loading">
+          <mat-icon>info</mat-icon>
+          Mostrando {{ usuarios.data.length }} de {{ totalItems }} usuarios
+        </mat-chip-option>
+        <mat-chip-option selected *ngIf="loading">
+          <mat-icon>hourglass_empty</mat-icon>
+          Cargando...
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Spinner de carga -->
+    <div class="text-center mb-3" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+      <table mat-table [dataSource]="usuarios" class="w-100">
+
+        <!-- Nombre completo -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Usuario</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="usuario-info">
+              <strong>{{ element.nombre }} {{ element.apellido }}</strong><br>
+              <small class="text-muted">{{ element.email }}</small><br>
+              <small class="text-muted" *ngIf="element.fecha_nacimiento">
+                Nacimiento: {{ element.fecha_nacimiento | date:'dd/MM/yyyy' }}
+              </small>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Email -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Contacto</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="contacto-info">
+              <div>
+                <mat-icon class="small-icon">email</mat-icon>
+                <a href="mailto:{{ element.email }}">{{ element.email }}</a>
+              </div>
+              <div class="text-muted small mt-1" *ngIf="element.fecha_registro">
+                Registrado: {{ element.fecha_registro | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Rol -->
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef>Cargo</th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="element.rol">
+              <mat-chip-listbox>
+                <mat-chip-option selected color="accent">
+                  <mat-icon>badge</mat-icon>
+                  {{ element.rol.nombre }}
+                </mat-chip-option>
+              </mat-chip-listbox>
+              <div *ngIf="element.is_staff" class="mt-1">
+                <small class="text-muted">
+                  <mat-icon class="small-icon">admin_panel_settings</mat-icon>
+                  Staff
+                </small>
+              </div>
+            </div>
+            <span *ngIf="!element.rol" class="text-muted">Sin cargo asignado</span>
+          </td>
+        </ng-container>
+
+        <!-- Especialidad -->
+        <ng-container matColumnDef="especialidad">
+          <th mat-header-cell *matHeaderCellDef>Especialidad</th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="element.especialidad">
+              <mat-icon class="small-icon">medical_services</mat-icon>
+              {{ element.especialidad.nombre }}
+            </div>
+            <span *ngIf="!element.especialidad" class="text-muted">Sin especialidad</span>
+          </td>
+        </ng-container>
+
+        <!-- Establecimiento -->
+        <ng-container matColumnDef="establecimiento">
+          <th mat-header-cell *matHeaderCellDef>Establecimiento</th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="element.establecimiento">
+              <strong>{{ element.establecimiento.nombre }}</strong><br>
+              <small class="text-muted">
+                <mat-icon class="small-icon">location_on</mat-icon>
+                {{ element.establecimiento.direccion }}
+              </small><br>
+              <small class="text-muted">
+                {{ element.establecimiento.tipo_establecimiento_display }} -
+                {{ element.establecimiento.nivel_display }}
+              </small>
+            </div>
+            <span *ngIf="!element.establecimiento" class="text-muted">Sin establecimiento</span>
+          </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="estado-info">
+              <mat-chip-listbox>
+                <mat-chip-option [color]="element.is_active ? 'primary' : 'warn'" selected>
+                  <mat-icon>{{ element.is_active ? 'check_circle' : 'block' }}</mat-icon>
+                  {{ element.is_active ? 'Activo' : 'Inactivo' }}
+                </mat-chip-option>
+              </mat-chip-listbox>
+
+              <div *ngIf="element.permisos && element.permisos.length > 0" class="mt-1">
+                <small class="text-muted">
+                  <mat-icon class="small-icon">security</mat-icon>
+                  {{ element.permisos.length }} permisos
+                </small>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Acciones">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="verUsuario(element)">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver Detalles</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="usuariosColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: usuariosColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mensaje cuando no hay datos -->
+    <div class="text-center py-4" *ngIf="!loading && usuarios.data.length === 0">
+      <mat-icon class="large-icon text-muted">search_off</mat-icon>
+      <h4 class="text-muted">No se encontraron usuarios</h4>
+      <p class="text-muted">
+        {{ filtrosActivos.length > 0 ? 'Intenta ajustar los filtros de búsqueda' : 'No hay usuarios registrados aún' }}
+      </p>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20, 50]"
+      [showFirstLastButtons]="true" aria-label="Seleccionar página de usuarios">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>
