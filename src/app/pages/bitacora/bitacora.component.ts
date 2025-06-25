@@ -220,22 +220,15 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (this.paginator) {
-      // Desactivar la paginación automática de MatTableDataSource
-      this.bitacora.paginator = null;
-
-      // Configurar eventos del paginador
-      const paginatorSub = this.paginator.page.subscribe((event: PageEvent) => {
-        console.log('Evento de paginación:', event);
+      // Suscribirse al evento de cambio de página
+      this.paginator.page.subscribe((event) => {
         this.currentPage = event.pageIndex;
         this.pageSize = event.pageSize;
         this.cargarBitacora();
       });
-
-      this.subscriptions.add(paginatorSub);
-      this.cdr.detectChanges();
     }
   }
-
+  
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
@@ -262,6 +255,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
       this.paginator.pageIndex = 0;
     }
   }
+
 
   private cargarBitacora(): void {
     this.loading = true;
@@ -297,7 +291,8 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
       params.ordering = formValues.ordering;
     }
 
-    console.log('Parámetros de consulta:', params);
+    // Verificar si los parámetros están correctamente configurados
+    console.log('Parámetros enviados para paginación:', params);
 
     const apiSub = this.apiService.get<ApiResponse<Bitacora>>('api/bitacora', params).subscribe({
       next: (data) => {
@@ -312,9 +307,9 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
           this.paginator.length = this.totalItems;
           this.paginator.pageSize = this.pageSize;
           this.paginator.pageIndex = this.currentPage;
-          
+
           // Forzar actualización del paginador
-          this.paginator._changePageSize(this.pageSize);
+          //this.paginator._changePageSize(this.pageSize);
         }
 
         this.loading = false;
@@ -324,11 +319,11 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
         console.error('Error al cargar la Bitácora:', err);
         this.loading = false;
         this.mostrarError('Error al cargar los datos de la bitácora');
-        
+
         // Reiniciar datos en caso de error
         this.bitacora.data = [];
         this.totalItems = 0;
-        
+
         this.cdr.detectChanges();
       }
     });
@@ -348,13 +343,13 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Cargar opciones de IP y acciones desde la bitácora
-    const opcionesSub = this.apiService.get<ApiResponse<Bitacora>>('api/bitacora', { 
+    const opcionesSub = this.apiService.get<ApiResponse<Bitacora>>('api/bitacora', {
       page_size: 500,
       distinct: 'ip,accion'
     }).subscribe({
       next: (data) => {
         const results = data.results || [];
-        
+
         // Extraer IPs únicas y filtrar valores válidos
         this.ips = [...new Set(results
           .map(b => b.ip)
@@ -443,20 +438,20 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
     if (formValues.search?.trim()) {
       filtros['Búsqueda'] = formValues.search.trim();
     }
-    
+
     if (formValues.usuario) {
       const usuario = this.usuarios.find(u => u.id === formValues.usuario);
       filtros['Usuario'] = usuario ? `${usuario.nombre} ${usuario.apellido}` : formValues.usuario;
     }
-    
+
     if (formValues.ip) {
       filtros['Dirección IP'] = formValues.ip;
     }
-    
+
     if (formValues.fecha_inicio) {
       filtros['Fecha desde'] = new Date(formValues.fecha_inicio).toLocaleDateString();
     }
-    
+
     if (formValues.fecha_fin) {
       filtros['Fecha hasta'] = new Date(formValues.fecha_fin).toLocaleDateString();
     }
@@ -480,10 +475,10 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
     const usuariosUnicos = new Set(bitacora.map(b => b.usuario?.id)).size;
     const accionesUnicas = new Set(bitacora.map(b => b.accion)).size;
     const ipsUnicas = new Set(bitacora.map(b => b.ip)).size;
-    
-    const fechaInicio = bitacora.length > 0 ? 
+
+    const fechaInicio = bitacora.length > 0 ?
       new Date(Math.min(...bitacora.map(b => new Date(b.timestamp).getTime()))) : null;
-    const fechaFin = bitacora.length > 0 ? 
+    const fechaFin = bitacora.length > 0 ?
       new Date(Math.max(...bitacora.map(b => new Date(b.timestamp).getTime()))) : null;
 
     return [
@@ -497,7 +492,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
             ['Usuarios únicos:', usuariosUnicos.toString()],
             ['Acciones diferentes:', accionesUnicas.toString()],
             ['Direcciones IP únicas:', ipsUnicas.toString()],
-            ['Período de datos:', fechaInicio && fechaFin ? 
+            ['Período de datos:', fechaInicio && fechaFin ?
               `${fechaInicio.toLocaleDateString()} - ${fechaFin.toLocaleDateString()}` : 'N/A']
           ]
         },
@@ -509,7 +504,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
 
   exportarBitacoraPDF(): void {
     if (this.generandoPDF) return;
-    
+
     this.generandoPDF = true;
     this.mostrarExito('Generando PDF...');
 
@@ -518,7 +513,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
         // Construir encabezados y filas dinámicamente
         const headers: string[] = [];
         const widths: (string | number)[] = [];
-        
+
         if (this.pdfConfig.columnas.usuario) {
           headers.push('Usuario');
           widths.push('*');
@@ -548,7 +543,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
           headers.map(h => ({ text: h, style: 'tableHeader' })),
           ...bitacora.map(item => {
             const row: any[] = [];
-            
+
             if (this.pdfConfig.columnas.usuario) {
               row.push(`${item.usuario?.nombre ?? ''} ${item.usuario?.apellido ?? ''}`.trim() || 'N/A');
             }
@@ -568,7 +563,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.pdfConfig.columnas.rol) {
               row.push(item.usuario?.rol?.nombre || 'N/A');
             }
-            
+
             return row;
           })
         ];
@@ -672,7 +667,7 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
             },
             tableHeader: {
               bold: true,
-              fillColor: '#4CAF50',  
+              fillColor: '#4CAF50',
               color: 'white',
               alignment: 'center' as const
             },
@@ -700,11 +695,11 @@ export class BitacoraComponent implements OnInit, AfterViewInit, OnDestroy {
         // Generar y descargar el PDF
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
         const filename = `bitacora_informe_${timestamp}.pdf`;
-        
+
         pdfMake.createPdf(docDefinition).download(filename);
-        
+
         this.mostrarExito('PDF generado exitosamente');
-        
+
       } catch (error) {
         console.error('Error al generar PDF:', error);
         this.mostrarError('Error al generar el PDF');

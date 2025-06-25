@@ -424,10 +424,8 @@
       <mat-icon>info</mat-icon>
       <span>Mostrando {{ bitacora.data.length }} de {{ totalItems }} registros</span>
     </div>
-
-    <!-- Paginador -->
-    <mat-paginator #paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20, 50]"
-      [showFirstLastButtons]="true" class="bitacora-paginator">
-    </mat-paginator>
   </div>
+  <!-- Paginador -->
+  <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons>
+  </mat-paginator>
 </mat-card>

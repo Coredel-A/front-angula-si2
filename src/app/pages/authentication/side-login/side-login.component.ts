@@ -43,7 +43,7 @@ export class AppSideLoginComponent {
         console.log('Cuerpo: ',body.access, body.user.rol, body.user.permisos);
         this.router.navigate(['/user-perfil']);
       }
-    })
+    });
   }
 
   submit() {

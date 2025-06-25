@@ -143,8 +143,6 @@
         </mat-card-actions>
       </mat-card>
 
-
-
       <mat-divider class="m-t-24 m-b-24"></mat-divider>
 
       <!-- Formulario de Especialidad -->
@@ -163,13 +161,16 @@
               <mat-card-subtitle>Formulario completado</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
-              <div class="respuestas-grid">
-                <div *ngFor="let respuesta of historia.preguntas_respuestas" class="respuesta-item">
-                  <div class="pregunta-text">{{ respuesta.texto }}</div>
-                  <div class="respuesta-valor">
-                    <mat-chip-set>
-                      <mat-chip>{{ respuesta.respuesta || 'Sin respuesta' }}</mat-chip>
-                    </mat-chip-set>
+              <div class="respuestas-completadas-container">
+                <div *ngFor="let respuesta of historia.preguntas_respuestas" class="respuesta-completada-item">
+                  <div class="pregunta-completada">
+                    <mat-icon class="pregunta-icon">help_outline</mat-icon>
+                    <span class="pregunta-texto">{{ respuesta.texto }}</span>
+                  </div>
+                  <div class="respuesta-completada">
+                    <mat-chip class="respuesta-chip" [class.respuesta-larga]="(respuesta.respuesta || '').length > 50">
+                      <span class="respuesta-texto">{{ respuesta.respuesta || 'Sin respuesta' }}</span>
+                    </mat-chip>
                   </div>
                 </div>
               </div>
@@ -338,3 +339,98 @@
     </mat-card-content>
   </mat-card>
 </div>
+
+<style>
+/* Estilos para el formulario completado */
+.respuestas-completadas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.respuesta-completada-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.pregunta-completada {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.pregunta-icon {
+  color: #666;
+  font-size: 18px;
+}
+
+.pregunta-texto {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.respuesta-completada {
+  margin-left: 26px; /* Alinear con el texto de la pregunta */
+}
+
+.respuesta-chip {
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+  border: 1px solid #c8e6c9;
+  max-width: 100%;
+  height: auto;
+  min-height: 32px;
+  padding: 8px 12px;
+}
+
+.respuesta-chip.respuesta-larga {
+  width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.respuesta-texto {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+  display: block;
+  max-width: 100%;
+}
+
+/* Estilos generales mejorados */
+.formulario-completado-card {
+  border: 2px solid #4caf50;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.1);
+}
+
+.success-icon {
+  color: #4caf50 !important;
+  background-color: #e8f5e8 !important;
+}
+
+.text-success {
+  color: #4caf50 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .respuesta-completada-item {
+    padding: 8px;
+  }
+  
+  .pregunta-texto {
+    font-size: 13px;
+  }
+  
+  .respuesta-completada {
+    margin-left: 12px;
+  }
+}
+</style>
